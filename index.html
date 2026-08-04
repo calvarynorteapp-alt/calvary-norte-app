@@ -634,16 +634,18 @@
         <p class="viewSub">Alabanza y adoración para escuchar cuando quieras</p>
         <div id="trackList"></div>
         <div class="nowPlayingBar" id="nowPlayingBar">
-          <button onclick="togglePlay()" id="npPlayBtn">
+          <button onclick="toggleFilePlay()" id="npPlayBtn">
             <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><polygon points="6 4 20 12 6 20 6 4"/></svg>
           </button>
           <div class="npInfo">
             <p class="tt" id="npTitle" style="color:#fff;">—</p>
             <p class="ta" id="npArtist">—</p>
           </div>
+          <span id="npOfflineBadge" style="display:none;font-size:.65rem;color:var(--exito);font-weight:700;">✓ Sin internet</span>
         </div>
-        <p style="font-size:.72rem;color:var(--piedra);margin-top:12px;">La música se transmite desde Google Drive. Necesitas conexión a internet para escucharla.</p>
+        <iframe id="driveAudioFrame" src="" style="width:100%;height:80px;border:none;border-radius:12px;display:none;" allow="autoplay"></iframe>
         <audio id="audioEl"></audio>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:12px;">La música se transmite desde Google Drive. Necesitas conexión a internet para escucharla.</p>
       </section>
     </div>
 
@@ -698,7 +700,7 @@
    2. Despliega el Apps Script como "Web app" y copia la URL que termina en /exec.
    3. Pega esa URL aquí abajo:
    ========================================================================= */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec';
 
 let notifiedDaysBefore = 3; // avisar cuando falten 3 días o menos
 let REMOTE = null; // aquí se guarda todo lo que llega del Sheet
@@ -730,7 +732,7 @@ if('serviceWorker' in navigator){
 }
 
 async function loadRemoteContent(){
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') === 0 || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec') === 0 || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec')){
     document.getElementById('schedList').innerHTML = '<div class="empty">Falta conectar el Google Sheet (ver instrucciones).</div>';
     document.getElementById('eventList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
     document.getElementById('minList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
@@ -1019,12 +1021,16 @@ function renderVideos(){
 }
 
 // ---- Música (viene del Google Sheet, vía REMOTE.musica) ----
+const MUSIC_CACHE = 'calvary-music-v1';
 const audioEl = document.getElementById('audioEl');
 let currentTrack = -1;
 let TRACKS = [];
+
 function renderTracks(){
   const list = document.getElementById('trackList');
-  TRACKS = (REMOTE && REMOTE.musica) ? REMOTE.musica.filter(t => t.titulo && t.driveId) : [];
+  TRACKS = (REMOTE && REMOTE.musica)
+    ? REMOTE.musica.filter(t => t.titulo && ((t.kind === 'drive' && t.driveId) || (t.kind === 'file' && t.filename)))
+    : [];
   if(TRACKS.length === 0){
     list.innerHTML = '<div class="empty">Aún no hay música publicada.</div>';
     return;
@@ -1034,23 +1040,69 @@ function renderTracks(){
       <div class="playIcon"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg></div>
       <div><p class="tt">${escapeHtml(t.titulo)}</p><p class="ta">${escapeHtml(t.artista || '')}</p></div>
     </div>`).join('');
+  // marca con un check las canciones ya guardadas para escuchar sin internet
+  TRACKS.forEach((t,i) => { if(t.kind === 'file') markOfflineBadge(i, t); });
 }
 
-function playTrack(i){
+async function markOfflineBadge(i, t){
+  try{
+    const cache = await caches.open(MUSIC_CACHE);
+    const hit = await cache.match('./musica/' + t.filename);
+    if(hit){
+      const el = document.getElementById('track-'+i);
+      if(el && !el.querySelector('.offlineDot')){
+        el.insertAdjacentHTML('beforeend', '<span class="offlineDot" title="Disponible sin internet" style="margin-left:auto;color:var(--exito);font-size:.9rem;">✓</span>');
+      }
+    }
+  }catch(e){}
+}
+
+async function playTrack(i){
   document.querySelectorAll('.track').forEach(el=>el.classList.remove('playing'));
-  if(currentTrack === i && !audioEl.paused){ audioEl.pause(); return; }
   currentTrack = i;
   const t = TRACKS[i];
-  audioEl.src = `https://drive.google.com/uc?export=download&id=${t.driveId}`;
-  audioEl.play().catch(()=> showToast('No se pudo reproducir. Verifica el enlace de Drive.'));
   document.getElementById('track-'+i).classList.add('playing');
+
+  if(t.kind === 'drive'){
+    // Respaldo para canciones que sigan en Google Drive: usa el reproductor
+    // propio de Drive (siempre requiere internet, no se puede cachear).
+    document.getElementById('nowPlayingBar').classList.remove('show');
+    document.getElementById('driveAudioFrame').style.display = 'block';
+    document.getElementById('driveAudioFrame').src = `https://drive.google.com/file/d/${t.driveId}/preview`;
+    return;
+  }
+
+  // Canción del repositorio (mismo origen): se reproduce con el reproductor
+  // propio de la app y se guarda en caché para poder escucharla sin internet.
+  document.getElementById('driveAudioFrame').style.display = 'none';
+  document.getElementById('driveAudioFrame').src = '';
+  document.getElementById('nowPlayingBar').classList.add('show');
   document.getElementById('npTitle').textContent = t.titulo;
   document.getElementById('npArtist').textContent = t.artista || '';
-  document.getElementById('nowPlayingBar').classList.add('show');
-  updatePlayIcon(true);
+  document.getElementById('npOfflineBadge').style.display = 'none';
+
+  const url = './musica/' + t.filename;
+  try{
+    const cache = await caches.open(MUSIC_CACHE);
+    let response = await cache.match(url);
+    if(response){
+      document.getElementById('npOfflineBadge').style.display = 'inline';
+    } else {
+      response = await fetch(url);
+      if(response.ok) cache.put(url, response.clone());
+    }
+    const blob = await response.blob();
+    audioEl.src = URL.createObjectURL(blob);
+    await audioEl.play();
+    updatePlayIcon(true);
+    markOfflineBadge(i, t);
+  }catch(e){
+    showToast('No se pudo reproducir esta canción');
+  }
 }
-function togglePlay(){
-  if(currentTrack < 0) return;
+
+function toggleFilePlay(){
+  if(currentTrack < 0 || !audioEl.src) return;
   if(audioEl.paused){ audioEl.play(); updatePlayIcon(true); }
   else { audioEl.pause(); updatePlayIcon(false); }
 }
@@ -1059,7 +1111,7 @@ function updatePlayIcon(playing){
     ? '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 }
-audioEl.addEventListener('ended', ()=>{ updatePlayIcon(false); });
+audioEl.addEventListener('ended', () => updatePlayIcon(false));
 
 
 // ---- Banner de inicio (viene del Google Sheet, vía REMOTE.banner) ----
@@ -1145,7 +1197,7 @@ async function submitPrayer(){
   const name = document.getElementById('prName').value.trim();
   const msg = document.getElementById('prMsg').value.trim();
   if(!msg){ showToast('Escribe tu petición antes de enviar'); return; }
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec')){
     showToast('Falta conectar el Google Sheet');
     return;
   }
@@ -1169,7 +1221,7 @@ async function submitVisitor(){
   const contacto = document.getElementById('visContacto').value.trim();
   const como = document.getElementById('visComo').value.trim();
   if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec')){
     showToast('Falta conectar el Google Sheet');
     return;
   }
@@ -1193,3 +1245,4 @@ loadRemoteContent();
 </script>
 </body>
 </html>
+
