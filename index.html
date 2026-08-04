@@ -730,7 +730,7 @@ if('serviceWorker' in navigator){
 }
 
 async function loadRemoteContent(){
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec') === 0 || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') === 0 || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
     document.getElementById('schedList').innerHTML = '<div class="empty">Falta conectar el Google Sheet (ver instrucciones).</div>';
     document.getElementById('eventList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
     document.getElementById('minList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
@@ -1145,7 +1145,7 @@ async function submitPrayer(){
   const name = document.getElementById('prName').value.trim();
   const msg = document.getElementById('prMsg').value.trim();
   if(!msg){ showToast('Escribe tu petición antes de enviar'); return; }
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
     showToast('Falta conectar el Google Sheet');
     return;
   }
@@ -1169,7 +1169,7 @@ async function submitVisitor(){
   const contacto = document.getElementById('visContacto').value.trim();
   const como = document.getElementById('visComo').value.trim();
   if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
-  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
     showToast('Falta conectar el Google Sheet');
     return;
   }
