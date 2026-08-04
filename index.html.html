@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Calvary Culiacán Norte</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#234E4C">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calvary Norte">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noche:#234E4C;
+    --noche-2:#163634;
+    --arena:#FBF6EE;
+    --arena-2:#F1E7D5;
+    --ocaso:#F0965A;
+    --ocaso-2:#D97D45;
+    --vino:#C4507A;
+    --piedra:#7A716A;
+    --oro:#D4A73B;
+    --texto:#2E2A26;
+    --blanco:#FFFDF9;
+    --exito:#55B854;
+    --radius:20px;
+    --shadow:0 8px 24px rgba(35,78,76,0.13);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito Sans',sans-serif;
+    color:var(--texto);
+    background:var(--arena);
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  #app{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--arena);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+  @media (min-width:431px){
+    #app{ min-height:100vh; margin:0 auto; box-shadow:var(--shadow); border-radius:28px; overflow:hidden;}
+    body{ padding:24px 0; }
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:linear-gradient(180deg,var(--noche) 0%,var(--noche-2) 100%);
+    color:var(--blanco);
+    padding:18px 20px 16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-shrink:0;
+    position:relative;
+    z-index:5;
+  }
+  header .backBtn{
+    background:none;border:none;cursor:pointer;padding:4px;
+    display:flex;align-items:center;color:var(--oro);
+  }
+  header .emblem{
+    width:36px;height:36px;flex-shrink:0;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 0 0 1px rgba(212,167,59,0.5);
+  }
+  header h1{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.15rem;
+    font-weight:600;
+    letter-spacing:.02em;
+    margin:0;
+    line-height:1.15;
+  }
+  header .sub{
+    font-size:.68rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--oro);
+    margin-top:2px;
+    font-weight:600;
+  }
+  header .titlewrap{display:flex;flex-direction:column;}
+
+  /* ---------- MAIN ---------- */
+  main{
+    flex:1;
+    overflow-y:auto;
+    padding-bottom:90px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .view{display:none;animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- HERO (Inicio) ---------- */
+  .hero{
+    position:relative;
+    height:190px;
+    background:linear-gradient(160deg,var(--noche) 0%,var(--noche-2) 100%);
+    overflow:hidden;
+  }
+  .bannerTrack{position:absolute;inset:0;}
+  .bannerSlide{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    opacity:0;transition:opacity .8s ease;
+  }
+  .bannerSlide.active{opacity:1;}
+  .bannerSlide::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,0.32) 100%);
+  }
+  .bannerDots{
+    position:absolute;bottom:12px;left:0;right:0;z-index:3;
+    display:flex;justify-content:center;gap:6px;
+  }
+  .bannerDots .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    transition:width .3s,background .3s;cursor:pointer;
+  }
+  .bannerDots .dot.active{width:18px;border-radius:4px;background:var(--blanco);}
+
+  section.pad{padding:22px 20px 8px;}
+
+  .card{
+    background:var(--blanco);
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+    border:1px solid rgba(110,98,89,0.08);
+  }
+  .card h3{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.05rem;
+    margin:0 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--noche);
+  }
+  .card h3 svg{width:19px;height:19px;flex-shrink:0;color:var(--ocaso);}
+
+  .eyebrow{
+    font-size:.68rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--ocaso);
+    margin:0 0 6px;
+  }
+
+  .schedRow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed rgba(110,98,89,0.25);font-size:.92rem;}
+  .schedRow:last-child{border-bottom:none;}
+  .schedRow .day{font-weight:600;color:var(--noche);}
+  .schedRow .time{color:var(--piedra);}
+
+  .tagline{
+    background:linear-gradient(135deg,var(--exito) 0%,#3F8F44 100%);
+    color:var(--blanco);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .tagline svg{width:26px;height:26px;flex-shrink:0;}
+  .tagline p{font-family:'Baloo 2',sans-serif;font-size:1.02rem;line-height:1.35;margin:0;font-weight:600;}
+
+  .liveBanner{
+    background:var(--noche);
+    border-radius:var(--radius);
+    overflow:hidden;
+    margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .liveBanner iframe{width:100%;height:190px;border:none;display:block;}
+  .liveBanner .liveTag{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 14px;color:var(--blanco);
+  }
+  .liveBanner .dotPulse{
+    width:9px;height:9px;border-radius:50%;background:#E5484D;flex-shrink:0;
+    animation:pulseLive 1.4s infinite;
+  }
+  @keyframes pulseLive{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .liveBanner .liveTxt strong{display:block;font-size:.82rem;font-family:'Baloo 2',sans-serif;}
+  .liveBanner .liveTxt p{margin:1px 0 0;font-size:.72rem;color:rgba(255,253,249,0.75);}
+
+  .installBanner{
+    display:none;
+    align-items:center;
+    gap:10px;
+    background:var(--noche);
+    color:var(--blanco);
+    border-radius:16px;
+    padding:12px 14px;
+    margin-bottom:16px;
+  }
+  .installBanner .ico{flex-shrink:0;width:30px;height:30px;color:var(--oro);}
+  .installBanner .txt{flex:1;min-width:0;}
+  .installBanner strong{display:block;font-size:.85rem;font-family:'Baloo 2',sans-serif;}
+  .installBanner p{margin:2px 0 0;font-size:.72rem;color:rgba(255,253,249,0.75);}
+  .installBanner .installBtn{
+    background:var(--exito);color:#fff;border:none;border-radius:10px;
+    padding:8px 12px;font-size:.76rem;font-weight:700;cursor:pointer;flex-shrink:0;
+    font-family:'Nunito Sans',sans-serif;
+  }
+  .installBanner .closeBtn{
+    background:none;border:none;color:rgba(255,253,249,0.6);cursor:pointer;
+    font-size:1rem;padding:4px;flex-shrink:0;
+  }
+  .quickBtn{
+    flex:1;
+    background:var(--blanco);
+    border:1px solid rgba(110,98,89,0.15);
+    border-radius:14px;
+    padding:14px 8px;
+    text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    cursor:pointer;
+    font-family:'Nunito Sans',sans-serif;
+    font-size:.72rem;
+    font-weight:600;
+    color:var(--noche);
+  }
+  .quickBtn svg{width:22px;height:22px;color:var(--exito);}
+  .quickBtn:active{background:var(--arena-2);}
+
+
+  h2.viewTitle{
+    font-family:'Baloo 2',sans-serif;
+    font-size:1.3rem;
+    margin:0 0 4px;
+    color:var(--noche);
+  }
+  p.viewSub{color:var(--piedra);font-size:.86rem;margin:0 0 18px;}
+
+  /* Eventos */
+  .eventCard{display:flex;gap:14px;margin-bottom:14px;}
+  .eventDate{
+    background:var(--noche);color:var(--blanco);border-radius:12px;
+    width:52px;height:52px;flex-shrink:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+  }
+  .eventDate .num{font-family:'Baloo 2',sans-serif;font-size:1.15rem;font-weight:700;line-height:1;}
+  .eventDate .mon{font-size:.6rem;text-transform:uppercase;color:var(--oro);letter-spacing:.06em;}
+  .eventBody h4{margin:0 0 3px;font-size:.95rem;color:var(--noche);}
+  .eventBody p{margin:0;font-size:.82rem;color:var(--piedra);line-height:1.4;}
+  .eventCard{position:relative;align-items:flex-start;}
+  .eventTop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .badge{
+    display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.04em;
+    padding:3px 8px;border-radius:20px;margin-top:5px;
+  }
+  .badge.soon{background:var(--ocaso);color:#fff;}
+  .badge.today{background:var(--vino);color:#fff;}
+  .badge.later{background:var(--arena-2);color:var(--piedra);}
+  .delBtn{background:none;border:none;color:var(--piedra);cursor:pointer;padding:4px;flex-shrink:0;}
+  .delBtn svg{width:16px;height:16px;}
+
+  .eventTopRow{display:flex;gap:8px;margin-bottom:16px;}
+  .smallBtn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--blanco);border:1px solid rgba(110,98,89,0.2);border-radius:12px;
+    padding:10px 6px;font-size:.76rem;font-weight:600;color:var(--noche);cursor:pointer;
+    font-family:'Nunito Sans',sans-serif;
+  }
+  .smallBtn svg{width:15px;height:15px;color:var(--ocaso);}
+  .smallBtn.on{background:var(--exito);color:var(--blanco);}
+  .smallBtn.on svg{color:var(--blanco);}
+
+  .adminForm{display:none;}
+  .adminForm.show{display:block;}
+
+  .pinCard{text-align:center;}
+  .pinCard input{text-align:center;letter-spacing:.3em;font-size:1.1rem;}
+
+  /* Grid (Más) */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .gridBtn{
+    background:var(--blanco);border-radius:var(--radius);padding:20px 14px;
+    display:flex;flex-direction:column;gap:10px;align-items:flex-start;
+    box-shadow:var(--shadow);cursor:pointer;border:none;text-align:left;
+    font-family:'Nunito Sans',sans-serif;
+  }
+  .gridBtn svg{width:26px;height:26px;color:var(--ocaso);}
+  .gridBtn span{font-weight:600;font-size:.9rem;color:var(--noche);}
+
+  /* Ministerios */
+  .minCard{display:flex;gap:12px;align-items:flex-start;}
+  .minIcon{
+    width:42px;height:42px;border-radius:11px;background:var(--arena-2);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .minIcon svg{width:21px;height:21px;color:var(--ocaso);}
+  .minCard h4{margin:0 0 3px;font-size:.95rem;color:var(--noche);}
+  .minCard p{margin:0 0 6px;font-size:.82rem;color:var(--piedra);line-height:1.4;}
+  .minCard a{font-size:.78rem;color:var(--exito);font-weight:600;text-decoration:none;}
+
+  /* Forms */
+  label{display:block;font-size:.78rem;font-weight:600;color:var(--noche);margin-bottom:6px;margin-top:14px;}
+  input[type=text], textarea{
+    width:100%;border:1px solid rgba(110,98,89,0.25);border-radius:12px;
+    padding:11px 12px;font-family:'Nunito Sans',sans-serif;font-size:.9rem;
+    background:var(--arena);color:var(--texto);resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus{outline:2px solid var(--ocaso);outline-offset:1px;}
+  .btnPrimary{
+    margin-top:16px;width:100%;background:var(--ocaso);color:var(--blanco);
+    border:none;border-radius:12px;padding:13px;font-weight:700;font-size:.92rem;
+    cursor:pointer;font-family:'Nunito Sans',sans-serif;transition:background .15s;
+  }
+  .btnPrimary:active{background:var(--ocaso-2);}
+  .btnPrimary:focus-visible{outline:2px solid var(--noche);outline-offset:2px;}
+  .btnGhost{
+    margin-top:10px;width:100%;background:transparent;color:var(--noche);
+    border:1.5px solid var(--noche);border-radius:12px;padding:12px;font-weight:600;
+    font-size:.88rem;cursor:pointer;font-family:'Nunito Sans',sans-serif;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btnGhost svg{width:16px;height:16px;}
+
+  .wallItem{
+    border-bottom:1px solid rgba(110,98,89,0.15);
+    padding:11px 0;
+  }
+  .wallItem:last-child{border-bottom:none;}
+  .wallItem .who{font-size:.78rem;font-weight:700;color:var(--vino);margin-bottom:2px;}
+  .wallItem .msg{font-size:.85rem;color:var(--texto);line-height:1.4;}
+  .wallItem .when{font-size:.68rem;color:var(--piedra);margin-top:3px;}
+  .empty{text-align:center;color:var(--piedra);font-size:.82rem;padding:14px 0;}
+
+  .toast{
+    position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--noche);color:var(--blanco);padding:11px 20px;border-radius:30px;
+    font-size:.82rem;font-weight:600;box-shadow:var(--shadow);opacity:0;
+    transition:all .25s ease;pointer-events:none;z-index:50;white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Diezmos */
+  .giveRow{display:flex;justify-content:space-between;padding:8px 0;font-size:.85rem;border-bottom:1px dashed rgba(110,98,89,0.2);}
+  .giveRow:last-child{border-bottom:none;}
+  .giveRow .k{color:var(--piedra);}
+  .giveRow .v{font-weight:600;color:var(--noche);}
+
+  /* Maps / video / music */
+  .mapWrap{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+  .mapWrap iframe{width:100%;height:230px;border:none;display:block;}
+  .videoCard{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+  .videoCard iframe{width:100%;height:200px;border:none;display:block;}
+  .videoCard .vt{padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--noche);background:var(--blanco);}
+
+  .track{
+    display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;
+    cursor:pointer;margin-bottom:8px;background:var(--blanco);box-shadow:var(--shadow);
+  }
+  .track.playing{background:var(--noche);}
+  .track.playing .tt,.track.playing .ta{color:var(--blanco);}
+  .track.playing .playIcon{background:var(--exito);}
+  .track .playIcon{
+    width:36px;height:36px;border-radius:50%;background:var(--ocaso);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+  }
+  .track .playIcon svg{width:15px;height:15px;}
+  .tt{font-size:.88rem;font-weight:600;color:var(--noche);margin:0;}
+  .ta{font-size:.76rem;color:var(--piedra);margin:0;}
+  .nowPlayingBar{
+    position:sticky;bottom:0;background:var(--noche);color:var(--blanco);
+    border-radius:16px;padding:12px 14px;display:none;align-items:center;gap:10px;
+    margin-top:8px;box-shadow:var(--shadow);
+  }
+  .nowPlayingBar.show{display:flex;}
+  .nowPlayingBar button{background:none;border:none;color:var(--oro);cursor:pointer;padding:4px;}
+  .nowPlayingBar .npInfo{flex:1;min-width:0;}
+  .nowPlayingBar .npInfo p{margin:0;font-size:.8rem;}
+  .nowPlayingBar .npInfo .ta{color:var(--oro);}
+
+  /* ---------- BOTTOM NAV ---------- */
+  nav.tabbar{
+    position:absolute;bottom:0;left:0;right:0;
+    background:var(--blanco);
+    display:flex;
+    padding:8px 4px 10px;
+    box-shadow:0 -6px 20px rgba(27,42,74,0.10);
+    z-index:10;
+  }
+  nav.tabbar button{
+    flex:1;background:none;border:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 2px;color:var(--piedra);font-family:'Nunito Sans',sans-serif;
+  }
+  nav.tabbar button svg{width:21px;height:21px;}
+  nav.tabbar button span{font-size:.62rem;font-weight:600;}
+  nav.tabbar button.active{color:var(--ocaso);}
+  nav.tabbar button.active svg{color:var(--ocaso);}
+
+  ::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <button class="backBtn" id="backBtn" style="display:none" aria-label="Volver" onclick="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <img class="emblem" src="data:image/jpeg;base64,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" alt="Calvary Norte">
+    <div class="titlewrap">
+      <h1 id="headerTitle">Calvary</h1>
+      <div class="sub" id="headerSub">Culiacán Norte</div>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ===================== INICIO ===================== -->
+    <div class="view active" id="view-inicio">
+      <div class="hero" id="heroBanner">
+        <div class="bannerTrack" id="bannerTrack"></div>
+        <div class="bannerDots" id="bannerDots"></div>
+      </div>
+
+      <section class="pad">
+        <div class="installBanner" id="installBanner">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
+          <div class="txt">
+            <strong>Instala la app</strong>
+            <p>Agrégala a tu pantalla de inicio para abrirla como una app.</p>
+          </div>
+          <button class="installBtn" onclick="triggerInstall()">Instalar</button>
+          <button class="closeBtn" onclick="dismissInstallBanner()" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="liveBanner" id="liveBanner" style="display:none;"></div>
+
+        <div class="tagline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <p>Estudiando la Biblia, verso a verso.</p>
+        </div>
+
+        <div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showView('nuevo')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;color:var(--exito);flex-shrink:0;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.9z"/></svg>
+          <div style="flex:1;min-width:0;">
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.95rem;">¿Nuevo aquí?</h4>
+            <p style="margin:2px 0 0;font-size:.78rem;color:var(--piedra);">Preséntate, nos encantaría conocerte</p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--piedra);flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div class="card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Horarios de servicio
+          </h3>
+          <div id="schedList">
+            <div class="schedRow"><span class="day">Cargando horario…</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== NUEVO AQUÍ ===================== -->
+    <div class="view" id="view-nuevo">
+      <section class="pad">
+        <h2 class="viewTitle">¡Qué bueno tenerte aquí!</h2>
+        <p class="viewSub">Cuéntanos un poco de ti para poder saludarte como se merece. Esta información es privada, solo la ve el equipo de bienvenida.</p>
+        <div class="card">
+          <label for="visNombre">Tu nombre</label>
+          <input type="text" id="visNombre" placeholder="Ej. Ana García">
+          <label for="visContacto">Teléfono o correo (opcional)</label>
+          <input type="text" id="visContacto" placeholder="Para mantenernos en contacto">
+          <label for="visComo">¿Cómo nos conociste?</label>
+          <input type="text" id="visComo" placeholder="Ej. un amigo, redes sociales, invitación...">
+          <button class="btnPrimary" onclick="submitVisitor()">Enviar</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== EVENTOS ===================== -->
+    <div class="view" id="view-eventos">
+      <section class="pad">
+        <h2 class="viewTitle">Anuncios y eventos</h2>
+        <p class="viewSub">Lo que está pasando en nuestra iglesia</p>
+
+        <div class="eventTopRow">
+          <button class="smallBtn" id="notifBtn" onclick="requestNotifPermission()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span id="notifBtnTxt">Activar avisos</span>
+          </button>
+        </div>
+
+        <div id="eventList"></div>
+      </section>
+    </div>
+
+    <!-- ===================== ORACIÓN ===================== -->
+    <div class="view" id="view-oracion">
+      <section class="pad">
+        <h2 class="viewTitle">Petición de oración</h2>
+        <p class="viewSub">Escríbenos y oraremos por ti. Tu petición es privada: solo la revisa el equipo pastoral.</p>
+
+        <div class="card">
+          <label for="prName">Tu nombre (opcional)</label>
+          <input type="text" id="prName" placeholder="Ej. Ana">
+          <label for="prMsg">Petición</label>
+          <textarea id="prMsg" rows="4" placeholder="Cuéntanos por qué quieres que oremos..."></textarea>
+          <button class="btnPrimary" onclick="submitPrayer()">Enviar petición</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== DIEZMOS ===================== -->
+    <div class="view" id="view-diezmos">
+      <section class="pad">
+        <h2 class="viewTitle">Diezmos y ofrendas</h2>
+        <p class="viewSub">"Cada uno dé como propuso en su corazón, no con tristeza ni por necesidad." 2 Corintios 9:7</p>
+
+        <div class="card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Transferencia bancaria
+          </h3>
+          <div class="giveRow"><span class="k">Banco</span><span class="v">Ej. BBVA</span></div>
+          <div class="giveRow"><span class="k">Cuenta</span><span class="v">000 000 0000</span></div>
+          <div class="giveRow"><span class="k">CLABE</span><span class="v">0000 0000 0000 0000 00</span></div>
+          <div class="giveRow"><span class="k">A nombre de</span><span class="v">Calvary Culiacán Norte A.R.</span></div>
+        </div>
+
+        <button class="btnGhost" onclick="window.open('https://www.paypal.com/donate','_blank')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          Dar en línea
+        </button>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:10px;text-align:center;">La iglesia actualizará este enlace con su cuenta de donación real.</p>
+      </section>
+    </div>
+
+    <!-- ===================== MÁS (menú) ===================== -->
+    <div class="view" id="view-mas">
+      <section class="pad">
+        <h2 class="viewTitle">Más</h2>
+        <p class="viewSub">Ministerios, diezmos, ubicación, videos y música</p>
+        <div class="grid2">
+          <button class="gridBtn" onclick="showView('ministerios')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Ministerios</span>
+          </button>
+          <button class="gridBtn" onclick="showView('diezmos')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8V5a2 2 0 1 1 2 2H3"/><path d="M12 8V5a2 2 0 1 0-2 2h11"/></svg>
+            <span>Diezmos</span>
+          </button>
+          <button class="gridBtn" onclick="showView('ubicacion')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>Ubicación</span>
+          </button>
+          <button class="gridBtn" onclick="showView('videos')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            <span>Videos</span>
+          </button>
+          <button class="gridBtn" onclick="showView('musica')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            <span>Música</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== MINISTERIOS ===================== -->
+    <div class="view" id="view-ministerios">
+      <section class="pad">
+        <h2 class="viewTitle">Ministerios y grupos</h2>
+        <p class="viewSub">Encuentra tu lugar para servir y crecer</p>
+        <div id="minList"></div>
+      </section>
+    </div>
+
+    <!-- ===================== UBICACIÓN ===================== -->
+    <div class="view" id="view-ubicacion">
+      <section class="pad">
+        <h2 class="viewTitle">Cómo llegar</h2>
+        <p class="viewSub">Te esperamos en nuestro templo</p>
+        <div class="mapWrap">
+          <iframe loading="lazy" src="https://www.google.com/maps?q=24.8335688,-107.3850217&z=17&output=embed"></iframe>
+        </div>
+        <div class="card">
+          <h3>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Dirección
+          </h3>
+          <p style="font-size:.88rem;color:var(--piedra);margin:0 0 12px;">Calvary Culiacán Norte, Culiacán, Sinaloa</p>
+          <button class="btnGhost" onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=24.8335688,-107.3850217','_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            Abrir en Google Maps
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== VIDEOS ===================== -->
+    <div class="view" id="view-videos">
+      <section class="pad">
+        <h2 class="viewTitle">Videos</h2>
+        <p class="viewSub">Prédicas y momentos de nuestra iglesia</p>
+        <div id="videoList"></div>
+        <button class="btnGhost" onclick="window.open('https://www.youtube.com/@CalvaryCuliacanNorte','_blank')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 6.2a2.8 2.8 0 0 0-2-2C18.9 3.7 12 3.7 12 3.7s-6.9 0-8.5.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 1 12a29 29 0 0 0 .5 5.8 2.8 2.8 0 0 0 2 2c1.6.5 8.5.5 8.5.5s6.9 0 8.5-.5a2.8 2.8 0 0 0 2-2A29 29 0 0 0 23 12a29 29 0 0 0-.5-5.8z"/><polygon points="9.8 15.5 15.8 12 9.8 8.5 9.8 15.5"/></svg>
+          Ver canal completo en YouTube
+        </button>
+      </section>
+    </div>
+
+    <!-- ===================== MÚSICA ===================== -->
+    <div class="view" id="view-musica">
+      <section class="pad">
+        <h2 class="viewTitle">Música</h2>
+        <p class="viewSub">Alabanza y adoración para escuchar cuando quieras</p>
+        <div id="trackList"></div>
+        <div class="nowPlayingBar" id="nowPlayingBar">
+          <button onclick="togglePlay()" id="npPlayBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          </button>
+          <div class="npInfo">
+            <p class="tt" id="npTitle" style="color:#fff;">—</p>
+            <p class="ta" id="npArtist">—</p>
+          </div>
+        </div>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:12px;">La música se transmite desde Google Drive. Necesitas conexión a internet para escucharla.</p>
+        <audio id="audioEl"></audio>
+      </section>
+    </div>
+
+    <!-- ===================== QUIÉNES SOMOS ===================== -->
+    <div class="view" id="view-quienes">
+      <section class="pad">
+        <h2 class="viewTitle">Quiénes somos</h2>
+        <p class="viewSub">Conoce nuestra historia, misión y visión</p>
+        <div id="quienesList"></div>
+      </section>
+    </div>
+
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-tab="inicio" onclick="showView('inicio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="tab" data-tab="eventos" onclick="showView('eventos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Eventos</span>
+    </button>
+    <button class="tab" data-tab="quienes" onclick="showView('quienes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.82 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17.5"/></svg>
+      <span>Nosotros</span>
+    </button>
+    <button class="tab" data-tab="oracion" onclick="showView('oracion')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.5 1-1a5.5 5.5 0 0 0 0-7.9z"/></svg>
+      <span>Oración</span>
+    </button>
+    <button class="tab" data-tab="mas" onclick="showView('mas')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg>
+      <span>Más</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* =========================================================================
+   CONTENIDO EDITABLE — la iglesia puede modificar estos datos fácilmente
+   ========================================================================= */
+
+/* =========================================================================
+   CONEXIÓN REMOTA — todo el contenido (horario, eventos, ministerios,
+   música y videos) se administra desde un Google Sheet, a distancia.
+   El público NUNCA puede editarlo desde la app, solo lo ve.
+
+   1. Crea el Google Sheet y el Apps Script (ver instrucciones que te dio Claude).
+   2. Despliega el Apps Script como "Web app" y copia la URL que termina en /exec.
+   3. Pega esa URL aquí abajo:
+   ========================================================================= */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec';
+
+let notifiedDaysBefore = 3; // avisar cuando falten 3 días o menos
+let REMOTE = null; // aquí se guarda todo lo que llega del Sheet
+
+/* ---- Instalar como app (PWA) ---- */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  let dismissed = false;
+  try{ dismissed = localStorage.getItem('installBannerDismissed') === '1'; }catch(err){}
+  if(!dismissed){ document.getElementById('installBanner').style.display = 'flex'; }
+});
+function triggerInstall(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(() => {
+    document.getElementById('installBanner').style.display = 'none';
+  });
+}
+function dismissInstallBanner(){
+  document.getElementById('installBanner').style.display = 'none';
+  try{ localStorage.setItem('installBannerDismissed', '1'); }catch(err){}
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+async function loadRemoteContent(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec') === 0 || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+    document.getElementById('schedList').innerHTML = '<div class="empty">Falta conectar el Google Sheet (ver instrucciones).</div>';
+    document.getElementById('eventList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
+    document.getElementById('minList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
+    document.getElementById('videoList').innerHTML = '<div class="empty">Falta conectar el canal de YouTube.</div>';
+    document.getElementById('trackList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
+    document.getElementById('quienesList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
+    return;
+  }
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {cache:'no-store'});
+    REMOTE = await res.json();
+    try{ localStorage.setItem('remoteCache', JSON.stringify(REMOTE)); }catch(err){}
+  }catch(e){
+    let cached = null;
+    try{ cached = localStorage.getItem('remoteCache'); }catch(err){}
+    if(cached){
+      REMOTE = JSON.parse(cached);
+      showToast('Sin conexión — mostrando la última versión guardada');
+    } else {
+      showToast('No se pudo conectar con el servidor de contenido');
+      return;
+    }
+  }
+  renderBanner();
+  renderLive();
+  renderSchedule();
+  const events = renderEvents();
+  renderMinistries();
+  renderVideos();
+  renderTracks();
+  renderQuienes();
+  checkEventNotifications(events);
+}
+
+/* =========================================================================
+   LÓGICA DE LA APP
+   ========================================================================= */
+
+const TITLES = {
+  inicio:['Calvary','Culiacán Norte'], eventos:['Eventos','Anuncios'], oracion:['Oración','Petición privada'],
+  diezmos:['Diezmos','Ofrendas'], mas:['Más','Explorar'], ministerios:['Ministerios','Grupos'],
+  ubicacion:['Ubicación','Cómo llegar'], videos:['Videos','YouTube'], musica:['Música','Alabanza'],
+  nuevo:['Bienvenida','Cuéntanos de ti'], quienes:['Quiénes somos','Nuestra historia']
+};
+const PRIMARY_TABS = ['inicio','eventos','quienes','oracion','mas'];
+const SUB_VIEWS = {ministerios:'mas', ubicacion:'mas', videos:'mas', musica:'mas', nuevo:'inicio', diezmos:'mas'};
+let currentView = 'inicio';
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('headerTitle').textContent = TITLES[name][0];
+  document.getElementById('headerSub').textContent = TITLES[name][1];
+  document.getElementById('backBtn').style.display = SUB_VIEWS[name] ? 'flex' : 'none';
+  document.querySelectorAll('nav.tabbar button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab === (SUB_VIEWS[name] || name));
+  });
+  currentView = name;
+  document.getElementById('main').scrollTop = 0;
+}
+function goBack(){ showView(SUB_VIEWS[currentView] || 'inicio'); }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+// ---- Eventos (vienen del Google Sheet, vía REMOTE.eventos) ----
+const MONTHS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+function renderEvents(){
+  const listEl = document.getElementById('eventList');
+  let events = (REMOTE && REMOTE.eventos) ? REMOTE.eventos.filter(e => e.Titulo && e.Fecha) : [];
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  events = events.map(e => ({
+    id: e.Titulo + '|' + e.Fecha,
+    title: e.Titulo,
+    date: formatDateStr(e.Fecha),
+    desc: e.Descripcion || ''
+  })).filter(e => {
+    const d = new Date(e.date+'T00:00:00');
+    return (today - d) <= 0;
+  }).sort((a,b)=> new Date(a.date) - new Date(b.date));
+
+  if(events.length === 0){
+    listEl.innerHTML = '<div class="empty">No hay eventos programados por ahora. ¡Vuelve pronto!</div>';
+  } else {
+    window.CURRENT_EVENTS = events;
+    listEl.innerHTML = events.map((e,i) => {
+      const d = new Date(e.date+'T00:00:00');
+      const diffDays = Math.round((d - today) / 86400000);
+      let badge = `<span class="badge later">Faltan ${diffDays} días</span>`;
+      if(diffDays === 0) badge = `<span class="badge today">¡Es hoy!</span>`;
+      else if(diffDays === 1) badge = `<span class="badge soon">¡Es mañana!</span>`;
+      else if(diffDays <= notifiedDaysBefore) badge = `<span class="badge soon">Faltan ${diffDays} días</span>`;
+      return `
+      <div class="eventCard">
+        <div class="eventDate"><div class="num">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div></div>
+        <div class="eventBody" style="flex:1;">
+          <div class="eventTop">
+            <h4>${escapeHtml(e.title)}</h4>
+            <button class="delBtn" onclick="addEventToCalendar(${i})" aria-label="Agregar al calendario" title="Agregar al calendario">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+            </button>
+          </div>
+          <p>${escapeHtml(e.desc)}</p>
+          ${badge}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  return events;
+}
+
+// El Sheet puede traer la fecha como texto "2026-08-14" o como objeto Date
+// (Google Sheets a veces la manda como fecha serializada); esto normaliza ambos casos.
+function formatDateStr(val){
+  if(val instanceof Date) return val.toISOString().slice(0,10);
+  const s = String(val).trim();
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[0];
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toISOString().slice(0,10);
+}
+
+// ---- Agregar evento al calendario del celular (descarga un archivo .ics,
+//      compatible con Google Calendar, Apple Calendar y Outlook) ----
+function addEventToCalendar(i){
+  const e = (window.CURRENT_EVENTS || [])[i];
+  if(!e) return;
+  const startStr = e.date.replace(/-/g,'');
+  const next = new Date(e.date+'T00:00:00');
+  next.setDate(next.getDate()+1);
+  const endStr = next.toISOString().slice(0,10).replace(/-/g,'');
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'BEGIN:VEVENT',
+    'DTSTART;VALUE=DATE:' + startStr,
+    'DTEND;VALUE=DATE:' + endStr,
+    'SUMMARY:' + icsEscape(e.title),
+    'DESCRIPTION:' + icsEscape(e.desc || ''),
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (e.title || 'evento').replace(/[^\w\-]+/g,'_') + '.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+  showToast('Evento descargado, ábrelo para agregarlo a tu calendario');
+}
+function icsEscape(s){
+  return String(s).replace(/([,;])/g, '\\$1').replace(/\n/g, '\\n');
+}
+
+// ---- Avisos: evento nuevo cargado + recordatorio de pocos días ----
+async function safeGet(key, shared){
+  try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function checkEventNotifications(events){
+  if(!events) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().slice(0,10);
+
+  let seenRaw = await safeGet('seen-events', false);
+  let seen = seenRaw ? JSON.parse(seenRaw) : [];
+  let remindedRaw = await safeGet('reminded-events', false);
+  let reminded = remindedRaw ? JSON.parse(remindedRaw) : {};
+
+  const messages = [];
+
+  for(const e of events){
+    if(!seen.includes(e.id)){
+      messages.push(`📅 Nuevo evento: ${e.title}`);
+      seen.push(e.id);
+    }
+    const d = new Date(e.date+'T00:00:00');
+    const diffDays = Math.round((d - today) / 86400000);
+    if(diffDays >= 0 && diffDays <= notifiedDaysBefore && reminded[e.id] !== todayStr){
+      const when = diffDays === 0 ? 'es hoy' : (diffDays === 1 ? 'es mañana' : `es en ${diffDays} días`);
+      messages.push(`⏰ ${e.title} ${when}`);
+      reminded[e.id] = todayStr;
+    }
+  }
+
+  if(messages.length){
+    try{
+      await window.storage.set('seen-events', JSON.stringify(seen), false);
+      await window.storage.set('reminded-events', JSON.stringify(reminded), false);
+    }catch(e){}
+    messages.forEach((m,i)=> setTimeout(()=> notifyUser(m), i*2600));
+  }
+}
+
+function notifyUser(msg){
+  showToast(msg);
+  if(window.Notification && Notification.permission === 'granted'){
+    try{ new Notification('Calvary Culiacán Norte', {body: msg}); }catch(e){}
+  }
+}
+
+function requestNotifPermission(){
+  if(!window.Notification){ showToast('Tu navegador no soporta avisos'); return; }
+  Notification.requestPermission().then(perm=>{
+    updateNotifBtn();
+    if(perm === 'granted') showToast('Avisos activados');
+  });
+}
+function updateNotifBtn(){
+  const btn = document.getElementById('notifBtn');
+  const txt = document.getElementById('notifBtnTxt');
+  if(window.Notification && Notification.permission === 'granted'){
+    btn.classList.add('on'); txt.textContent = 'Avisos activos';
+  } else {
+    btn.classList.remove('on'); txt.textContent = 'Activar avisos';
+  }
+}
+updateNotifBtn();
+
+// ---- Administración de eventos: ya NO se hace desde la app. Se administra
+//      a distancia editando el Google Sheet — así el público nunca puede
+//      modificar horarios, eventos, ministerios ni música.
+
+// ---- Quiénes somos (viene del Google Sheet, vía REMOTE.quienes) ----
+function renderQuienes(){
+  const list = document.getElementById('quienesList');
+  const items = (REMOTE && REMOTE.quienes) ? REMOTE.quienes.filter(q => q.Titulo || q.Texto) : [];
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty">Aún no hay contenido publicado.</div>';
+    return;
+  }
+  const sorted = items.slice().sort((a,b) => {
+    const oa = a.Orden === '' || a.Orden == null ? 999 : Number(a.Orden);
+    const ob = b.Orden === '' || b.Orden == null ? 999 : Number(b.Orden);
+    return oa - ob;
+  });
+  list.innerHTML = sorted.map(q => `
+    <div class="card">
+      ${q.Imagen ? `<img src="${q.Imagen}" alt="${escapeHtml(q.Titulo||'')}" style="width:100%;border-radius:14px;margin-bottom:12px;display:block;">` : ''}
+      ${q.Titulo ? `<h3>${escapeHtml(q.Titulo)}</h3>` : ''}
+      <p style="margin:0;font-size:.88rem;color:var(--piedra);line-height:1.55;white-space:pre-wrap;">${escapeHtml(q.Texto||'')}</p>
+    </div>`).join('');
+}
+
+// ---- Ministerios (vienen del Google Sheet, vía REMOTE.ministerios) ----
+function renderMinistries(){
+  const list = document.getElementById('minList');
+  const items = (REMOTE && REMOTE.ministerios) ? REMOTE.ministerios.filter(m => m.Nombre) : [];
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty">Aún no hay ministerios publicados.</div>';
+    return;
+  }
+  list.innerHTML = items.map(m => `
+    <div class="card minCard">
+      <div class="minIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
+      <div>
+        <h4>${escapeHtml(m.Nombre)}</h4>
+        <p>${escapeHtml(m.Descripcion || '')}</p>
+        ${m.WhatsApp ? `<a href="${escapeHtml(m.WhatsApp)}" target="_blank" rel="noopener">Contactar por WhatsApp →</a>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ---- Videos (vienen del canal de YouTube, vía REMOTE.videos) ----
+function renderVideos(){
+  const list = document.getElementById('videoList');
+  const items = (REMOTE && REMOTE.videos) ? REMOTE.videos : [];
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty">No se encontraron videos recientes del canal.</div>';
+    return;
+  }
+  list.innerHTML = items.map(v => `
+    <div class="videoCard">
+      <iframe loading="lazy" src="https://www.youtube.com/embed/${v.id}" title="${escapeHtml(v.title)}" allowfullscreen></iframe>
+      <div class="vt">${escapeHtml(v.title)}</div>
+    </div>`).join('');
+}
+
+// ---- Música (viene del Google Sheet, vía REMOTE.musica) ----
+const audioEl = document.getElementById('audioEl');
+let currentTrack = -1;
+let TRACKS = [];
+function renderTracks(){
+  const list = document.getElementById('trackList');
+  TRACKS = (REMOTE && REMOTE.musica) ? REMOTE.musica.filter(t => t.titulo && t.driveId) : [];
+  if(TRACKS.length === 0){
+    list.innerHTML = '<div class="empty">Aún no hay música publicada.</div>';
+    return;
+  }
+  list.innerHTML = TRACKS.map((t,i) => `
+    <div class="track" id="track-${i}" onclick="playTrack(${i})">
+      <div class="playIcon"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg></div>
+      <div><p class="tt">${escapeHtml(t.titulo)}</p><p class="ta">${escapeHtml(t.artista || '')}</p></div>
+    </div>`).join('');
+}
+
+function playTrack(i){
+  document.querySelectorAll('.track').forEach(el=>el.classList.remove('playing'));
+  if(currentTrack === i && !audioEl.paused){ audioEl.pause(); return; }
+  currentTrack = i;
+  const t = TRACKS[i];
+  audioEl.src = `https://drive.google.com/uc?export=download&id=${t.driveId}`;
+  audioEl.play().catch(()=> showToast('No se pudo reproducir. Verifica el enlace de Drive.'));
+  document.getElementById('track-'+i).classList.add('playing');
+  document.getElementById('npTitle').textContent = t.titulo;
+  document.getElementById('npArtist').textContent = t.artista || '';
+  document.getElementById('nowPlayingBar').classList.add('show');
+  updatePlayIcon(true);
+}
+function togglePlay(){
+  if(currentTrack < 0) return;
+  if(audioEl.paused){ audioEl.play(); updatePlayIcon(true); }
+  else { audioEl.pause(); updatePlayIcon(false); }
+}
+function updatePlayIcon(playing){
+  document.getElementById('npPlayBtn').innerHTML = playing
+    ? '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+}
+audioEl.addEventListener('ended', ()=>{ updatePlayIcon(false); });
+
+
+// ---- Banner de inicio (viene del Google Sheet, vía REMOTE.banner) ----
+let bannerTimer = null;
+function renderBanner(){
+  const track = document.getElementById('bannerTrack');
+  const dotsEl = document.getElementById('bannerDots');
+  const items = (REMOTE && REMOTE.banner) ? REMOTE.banner.filter(b => b.url) : [];
+
+  if(bannerTimer){ clearInterval(bannerTimer); bannerTimer = null; }
+
+  if(items.length === 0){
+    track.innerHTML = '';
+    dotsEl.innerHTML = '';
+    return;
+  }
+
+  track.innerHTML = items.map((b,i) =>
+    `<div class="bannerSlide${i===0 ? ' active':''}" style="background-image:url('${b.url}')" title="${escapeHtml(b.titulo||'')}"></div>`
+  ).join('');
+
+  dotsEl.innerHTML = items.length > 1
+    ? items.map((b,i) => `<span class="dot${i===0?' active':''}" onclick="goToBannerSlide(${i})"></span>`).join('')
+    : '';
+
+  let current = 0;
+  function showSlide(i){
+    const slides = track.querySelectorAll('.bannerSlide');
+    const dots = dotsEl.querySelectorAll('.dot');
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slides[i].classList.add('active');
+    if(dots[i]) dots[i].classList.add('active');
+    current = i;
+  }
+  window.goToBannerSlide = function(i){ showSlide(i); };
+
+  if(items.length > 1){
+    bannerTimer = setInterval(() => {
+      showSlide((current + 1) % items.length);
+    }, 5000);
+  }
+}
+
+
+// ---- "En vivo ahora" (viene del canal de YouTube, vía REMOTE.live) ----
+function renderLive(){
+  const el = document.getElementById('liveBanner');
+  const live = REMOTE && REMOTE.live;
+  if(!live || !live.id){
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <iframe loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0" title="En vivo" allowfullscreen></iframe>
+    <div class="liveTag">
+      <span class="dotPulse"></span>
+      <div class="liveTxt">
+        <strong>EN VIVO AHORA</strong>
+        <p>${escapeHtml(live.title || '')}</p>
+      </div>
+    </div>`;
+}
+
+function renderSchedule(){
+  const el = document.getElementById('schedList');
+  const items = (REMOTE && REMOTE.horario) ? REMOTE.horario.filter(h => h.Dia) : [];
+  if(items.length === 0){
+    el.innerHTML = '<div class="empty">Aún no hay horario publicado.</div>';
+    return;
+  }
+  el.innerHTML = items.map(h => `
+    <div class="schedRow"><span class="day">${escapeHtml(h.Dia)}</span><span class="time">${escapeHtml(h.Hora || '')} · ${escapeHtml(h.Descripcion || '')}</span></div>
+  `).join('');
+}
+
+function escapeHtml(s){
+  return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+async function submitPrayer(){
+  const name = document.getElementById('prName').value.trim();
+  const msg = document.getElementById('prMsg').value.trim();
+  if(!msg){ showToast('Escribe tu petición antes de enviar'); return; }
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+    showToast('Falta conectar el Google Sheet');
+    return;
+  }
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({tipo: 'oracion', nombre: name, peticion: msg})
+    });
+    const out = await res.json();
+    if(!out.ok) throw new Error(out.error || 'error');
+    document.getElementById('prName').value = '';
+    document.getElementById('prMsg').value = '';
+    showToast('Petición enviada. Oraremos por ti 🙏');
+  }catch(e){
+    showToast('No se pudo enviar. Intenta de nuevo.');
+  }
+}
+
+async function submitVisitor(){
+  const nombre = document.getElementById('visNombre').value.trim();
+  const contacto = document.getElementById('visContacto').value.trim();
+  const como = document.getElementById('visComo').value.trim();
+  if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwhpLsXuLnb-DnTCElklqf5fn6o0GqSfZHPRhtjMHhCLDNBj4P4DTUSm5SDuzVPX2sc/exec')){
+    showToast('Falta conectar el Google Sheet');
+    return;
+  }
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({tipo: 'visitante', nombre, contacto, como})
+    });
+    const out = await res.json();
+    if(!out.ok) throw new Error(out.error || 'error');
+    document.getElementById('visNombre').value = '';
+    document.getElementById('visContacto').value = '';
+    document.getElementById('visComo').value = '';
+    showToast('¡Gracias por presentarte! 💚');
+    showView('inicio');
+  }catch(e){
+    showToast('No se pudo enviar. Intenta de nuevo.');
+  }
+}
+loadRemoteContent();
+</script>
+</body>
+</html>
