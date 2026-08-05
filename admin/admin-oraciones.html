@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oraciones — Panel de administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noche:#234E4C; --arena:#FBF6EE; --arena-2:#F1E7D5;
+    --ocaso:#F0965A; --exito:#55B854; --piedra:#7A716A; --texto:#2E2A26; --blanco:#FFFDF9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;background:var(--arena);color:var(--texto);}
+  header{background:var(--noche);color:var(--blanco);padding:18px 20px;}
+  header h1{font-family:'Baloo 2',sans-serif;font-size:1.2rem;margin:0;}
+  header p{margin:4px 0 0;font-size:.8rem;color:#cfe8e6;}
+  main{max-width:720px;margin:0 auto;padding:20px;}
+
+  #gate{max-width:340px;margin:60px auto;background:var(--blanco);border-radius:16px;padding:26px;box-shadow:0 8px 24px rgba(0,0,0,0.1);text-align:center;}
+  #gate h2{font-family:'Baloo 2',sans-serif;margin:0 0 6px;color:var(--noche);}
+  #gate p{font-size:.85rem;color:var(--piedra);margin:0 0 16px;}
+  #gate input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:1rem;text-align:center;letter-spacing:.2em;margin-bottom:12px;}
+  #gate button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--ocaso);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;}
+  #gateError{color:#c0392b;font-size:.8rem;margin-top:8px;display:none;}
+
+  #app{display:none;}
+  .toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+  .toolbar label{font-size:.85rem;color:var(--piedra);display:flex;align-items:center;gap:6px;}
+  .toolbar button{margin-left:auto;background:var(--blanco);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:.8rem;cursor:pointer;}
+
+  .card{background:var(--blanco);border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,0.06);}
+  .card.done{opacity:.55;}
+  .cardTop{display:flex;justify-content:space-between;gap:10px;}
+  .who{font-weight:700;color:var(--noche);font-size:.92rem;}
+  .when{font-size:.72rem;color:var(--piedra);}
+  .msg{margin:8px 0 12px;font-size:.9rem;line-height:1.5;}
+  .actions{display:flex;gap:8px;}
+  .actions button{border:none;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;cursor:pointer;}
+  .btnAtender{background:var(--exito);color:#fff;}
+  .btnAtender.undo{background:var(--arena-2);color:var(--texto);}
+  .btnBorrar{background:#F3D7D2;color:#8a2f22;}
+  .empty{text-align:center;color:var(--piedra);padding:40px 0;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h2>🙏 Oraciones</h2>
+  <p>Panel privado del equipo pastoral. Escribe la clave para continuar.</p>
+  <input type="password" id="pinInput" placeholder="Clave" inputmode="numeric">
+  <button onclick="enter()">Entrar</button>
+  <p id="gateError">Clave incorrecta.</p>
+</div>
+
+<div id="app">
+  <header>
+    <h1>🙏 Peticiones de oración</h1>
+    <p>Calvary Culiacán Norte — panel privado</p>
+  </header>
+  <main>
+    <div class="toolbar">
+      <label><input type="checkbox" id="hideDone" onchange="render()"> Ocultar atendidas</label>
+      <button onclick="load()">↻ Actualizar</button>
+    </div>
+    <div id="list"></div>
+  </main>
+</div>
+
+<script>
+// ------------------------------------------------------------------
+// Pega aquí la misma URL /exec que usa tu app pública
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec';
+// ------------------------------------------------------------------
+
+let PIN = '';
+let ROWS = [];
+
+function enter(){
+  PIN = document.getElementById('pinInput').value.trim();
+  if(!PIN){ return; }
+  load();
+}
+
+async function load(){
+  try{
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=admin_oraciones&pin=${encodeURIComponent(PIN)}`, {cache:'no-store'});
+    const out = await res.json();
+    if(!out.ok){
+      document.getElementById('gateError').style.display = 'block';
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('gate').style.display = 'block';
+      return;
+    }
+    ROWS = out.rows.sort((a,b) => new Date(b.Fecha) - new Date(a.Fecha));
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    render();
+  }catch(e){
+    alert('No se pudo conectar. Revisa tu conexión a internet.');
+  }
+}
+
+function render(){
+  const hideDone = document.getElementById('hideDone').checked;
+  const list = document.getElementById('list');
+  const items = hideDone ? ROWS.filter(r => !r.Atendida) : ROWS;
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty">No hay peticiones para mostrar.</div>';
+    return;
+  }
+  list.innerHTML = items.map(r => `
+    <div class="card ${r.Atendida ? 'done' : ''}">
+      <div class="cardTop">
+        <div class="who">${escapeHtml(r.Nombre || 'Anónimo')}</div>
+        <div class="when">${formatDate(r.Fecha)}</div>
+      </div>
+      <div class="msg">${escapeHtml(r.Peticion || '')}</div>
+      <div class="actions">
+        <button class="btnAtender ${r.Atendida ? 'undo' : ''}" onclick="toggleAtendida(${r.row}, ${!r.Atendida})">
+          ${r.Atendida ? '↺ Marcar pendiente' : '✓ Marcar atendida'}
+        </button>
+        <button class="btnBorrar" onclick="borrar(${r.row})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+async function toggleAtendida(row, atendida){
+  await post({action:'mark_atendida', row, atendida});
+  load();
+}
+async function borrar(row){
+  if(!confirm('¿Eliminar esta petición? No se puede deshacer.')) return;
+  await post({action:'delete_oracion', row});
+  load();
+}
+async function post(body){
+  try{
+    const res = await fetch(APPS_SCRIPT_URL, {method:'POST', body: JSON.stringify({...body, pin: PIN})});
+    return await res.json();
+  }catch(e){
+    alert('No se pudo completar la acción.');
+  }
+}
+function formatDate(v){
+  const d = new Date(v);
+  return isNaN(d) ? '' : d.toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+document.getElementById('pinInput').addEventListener('keydown', e => { if(e.key === 'Enter') enter(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eventos y Visitantes — Panel de administración</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noche:#234E4C; --arena:#FBF6EE; --arena-2:#F1E7D5;
+    --ocaso:#F0965A; --exito:#55B854; --piedra:#7A716A; --texto:#2E2A26; --blanco:#FFFDF9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;background:var(--arena);color:var(--texto);}
+  header{background:var(--noche);color:var(--blanco);padding:18px 20px;}
+  header h1{font-family:'Baloo 2',sans-serif;font-size:1.2rem;margin:0;}
+  header p{margin:4px 0 0;font-size:.8rem;color:#cfe8e6;}
+  main{max-width:760px;margin:0 auto;padding:20px;}
+
+  #gate{max-width:340px;margin:60px auto;background:var(--blanco);border-radius:16px;padding:26px;box-shadow:0 8px 24px rgba(0,0,0,0.1);text-align:center;}
+  #gate h2{font-family:'Baloo 2',sans-serif;margin:0 0 6px;color:var(--noche);}
+  #gate p{font-size:.85rem;color:var(--piedra);margin:0 0 16px;}
+  #gate input{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:1rem;text-align:center;letter-spacing:.2em;margin-bottom:12px;}
+  #gate button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--ocaso);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;}
+  #gateError{color:#c0392b;font-size:.8rem;margin-top:8px;display:none;}
+
+  #app{display:none;}
+  .tabs{display:flex;gap:8px;margin-bottom:18px;}
+  .tabs button{flex:1;padding:12px;border:none;border-radius:10px;background:var(--blanco);color:var(--piedra);font-weight:700;cursor:pointer;font-size:.9rem;}
+  .tabs button.active{background:var(--noche);color:#fff;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .card{background:var(--blanco);border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 14px rgba(0,0,0,0.06);}
+  .cardTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+  .who{font-weight:700;color:var(--noche);font-size:.95rem;}
+  .when{font-size:.72rem;color:var(--piedra);white-space:nowrap;}
+  .msg{margin:8px 0 12px;font-size:.88rem;line-height:1.5;color:var(--piedra);}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .actions button{border:none;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;cursor:pointer;}
+  .btnEditar{background:var(--arena-2);color:var(--texto);}
+  .btnGuardar{background:var(--exito);color:#fff;}
+  .btnBorrar{background:#F3D7D2;color:#8a2f22;}
+  .empty{text-align:center;color:var(--piedra);padding:40px 0;}
+
+  label{display:block;font-size:.78rem;font-weight:700;color:var(--noche);margin:10px 0 4px;}
+  input[type=text],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-family:inherit;font-size:.9rem;}
+  .formCard{background:var(--blanco);border-radius:14px;padding:18px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,0.06);}
+  .formCard h3{margin:0 0 4px;font-family:'Baloo 2',sans-serif;color:var(--noche);}
+  .btnPrimary{margin-top:12px;width:100%;background:var(--ocaso);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;cursor:pointer;}
+  .toolbar{display:flex;justify-content:flex-end;margin-bottom:10px;}
+  .toolbar button{background:var(--blanco);border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:.8rem;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h2>📋 Eventos y Visitantes</h2>
+  <p>Panel privado del equipo. Escribe la clave para continuar.</p>
+  <input type="password" id="pinInput" placeholder="Clave" inputmode="numeric">
+  <button onclick="enter()">Entrar</button>
+  <p id="gateError">Clave incorrecta.</p>
+</div>
+
+<div id="app">
+  <header>
+    <h1>📋 Eventos y Visitantes</h1>
+    <p>Calvary Culiacán Norte — panel privado</p>
+  </header>
+  <main>
+    <div class="tabs">
+      <button id="tabBtnEventos" class="active" onclick="showTab('eventos')">Eventos</button>
+      <button id="tabBtnVisitantes" onclick="showTab('visitantes')">Visitantes</button>
+    </div>
+
+    <!-- ===== EVENTOS ===== -->
+    <div class="panel active" id="panel-eventos">
+      <div class="formCard">
+        <h3>Nuevo evento</h3>
+        <label>Título</label>
+        <input type="text" id="evTitulo">
+        <label>Fecha</label>
+        <input type="text" id="evFecha" placeholder="AAAA-MM-DD" onfocus="this.type='date'">
+        <label>Descripción</label>
+        <textarea id="evDescripcion" rows="2"></textarea>
+        <button class="btnPrimary" onclick="addEvento()">Agregar evento</button>
+      </div>
+      <div class="toolbar"><button onclick="loadEventos()">↻ Actualizar</button></div>
+      <div id="listEventos"></div>
+    </div>
+
+    <!-- ===== VISITANTES ===== -->
+    <div class="panel" id="panel-visitantes">
+      <div class="toolbar"><button onclick="loadVisitantes()">↻ Actualizar</button></div>
+      <div id="listVisitantes"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ------------------------------------------------------------------
+// Pega aquí la misma URL /exec que usa tu app pública
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSROXqzIjtyfu9K3FV_IaJnB9DNgg56Woj8nihwE4KUPZHl2UbU4BQX/exec';
+// ------------------------------------------------------------------
+
+let PIN = '';
+let EVENTOS = [];
+let VISITANTES = [];
+
+function enter(){
+  PIN = document.getElementById('pinInput').value.trim();
+  if(!PIN) return;
+  loadEventos();
+}
+
+function showTab(name){
+  document.getElementById('panel-eventos').classList.toggle('active', name==='eventos');
+  document.getElementById('panel-visitantes').classList.toggle('active', name==='visitantes');
+  document.getElementById('tabBtnEventos').classList.toggle('active', name==='eventos');
+  document.getElementById('tabBtnVisitantes').classList.toggle('active', name==='visitantes');
+  if(name === 'visitantes' && VISITANTES.length === 0) loadVisitantes();
+}
+
+async function gatedFetch(action){
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=${action}&pin=${encodeURIComponent(PIN)}`, {cache:'no-store'});
+  return await res.json();
+}
+async function post(body){
+  const res = await fetch(APPS_SCRIPT_URL, {method:'POST', body: JSON.stringify({...body, pin: PIN})});
+  return await res.json();
+}
+function openGate(){
+  document.getElementById('gate').style.display = 'block';
+  document.getElementById('app').style.display = 'none';
+}
+function openApp(){
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// ---- Eventos ----
+async function loadEventos(){
+  try{
+    const out = await gatedFetch('admin_eventos');
+    if(!out.ok){ document.getElementById('gateError').style.display='block'; openGate(); return; }
+    EVENTOS = out.rows.sort((a,b) => new Date(a.Fecha) - new Date(b.Fecha));
+    openApp();
+    renderEventos();
+  }catch(e){ alert('No se pudo conectar.'); }
+}
+function renderEventos(){
+  const list = document.getElementById('listEventos');
+  if(EVENTOS.length === 0){ list.innerHTML = '<div class="empty">No hay eventos.</div>'; return; }
+  list.innerHTML = EVENTOS.map(r => `
+    <div class="card" id="evcard-${r.row}">
+      <div class="cardTop">
+        <div class="who">${escapeHtml(r.Titulo)}</div>
+        <div class="when">${escapeHtml(String(r.Fecha).slice(0,10))}</div>
+      </div>
+      <div class="msg">${escapeHtml(r.Descripcion||'')}</div>
+      <div class="actions">
+        <button class="btnEditar" onclick="editEvento(${r.row})">Editar</button>
+        <button class="btnBorrar" onclick="deleteEvento(${r.row})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+function editEvento(row){
+  const r = EVENTOS.find(x => x.row === row);
+  const el = document.getElementById('evcard-'+row);
+  el.innerHTML = `
+    <label>Título</label><input type="text" id="et-${row}" value="${escapeAttr(r.Titulo)}">
+    <label>Fecha</label><input type="text" id="ef-${row}" value="${escapeAttr(String(r.Fecha).slice(0,10))}">
+    <label>Descripción</label><textarea id="ed-${row}" rows="2">${escapeHtml(r.Descripcion||'')}</textarea>
+    <div class="actions" style="margin-top:10px;">
+      <button class="btnGuardar" onclick="saveEvento(${row})">Guardar</button>
+      <button class="btnEditar" onclick="renderEventos()">Cancelar</button>
+    </div>`;
+}
+async function saveEvento(row){
+  await post({
+    action:'update_evento', row,
+    titulo: document.getElementById('et-'+row).value,
+    fecha: document.getElementById('ef-'+row).value,
+    descripcion: document.getElementById('ed-'+row).value
+  });
+  loadEventos();
+}
+async function deleteEvento(row){
+  if(!confirm('¿Eliminar este evento?')) return;
+  await post({action:'delete_evento', row});
+  loadEventos();
+}
+async function addEvento(){
+  const titulo = document.getElementById('evTitulo').value.trim();
+  const fecha = document.getElementById('evFecha').value.trim();
+  const descripcion = document.getElementById('evDescripcion').value.trim();
+  if(!titulo || !fecha){ alert('Falta título o fecha'); return; }
+  await post({action:'add_evento', titulo, fecha, descripcion});
+  document.getElementById('evTitulo').value = '';
+  document.getElementById('evFecha').value = '';
+  document.getElementById('evDescripcion').value = '';
+  loadEventos();
+}
+
+// ---- Visitantes ----
+async function loadVisitantes(){
+  try{
+    const out = await gatedFetch('admin_visitantes');
+    if(!out.ok){ document.getElementById('gateError').style.display='block'; openGate(); return; }
+    VISITANTES = out.rows.sort((a,b) => new Date(b.Fecha) - new Date(a.Fecha));
+    renderVisitantes();
+  }catch(e){ alert('No se pudo conectar.'); }
+}
+function renderVisitantes(){
+  const list = document.getElementById('listVisitantes');
+  if(VISITANTES.length === 0){ list.innerHTML = '<div class="empty">No hay visitantes registrados.</div>'; return; }
+  list.innerHTML = VISITANTES.map(r => `
+    <div class="card" id="vcard-${r.row}">
+      <div class="cardTop">
+        <div class="who">${escapeHtml(r.Nombre)}</div>
+        <div class="when">${formatDate(r.Fecha)}</div>
+      </div>
+      <div class="msg">
+        ${r.Contacto ? '📞 ' + escapeHtml(r.Contacto) + '<br>' : ''}
+        ${r.Como ? '💬 ' + escapeHtml(r.Como) : ''}
+      </div>
+      <label>Notas de seguimiento</label>
+      <textarea id="vn-${r.row}" rows="2" placeholder="Ej. Se le llamó el 5 de agosto, vendrá el domingo">${escapeHtml(r.Notas||'')}</textarea>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btnGuardar" onclick="saveVisitante(${r.row})">Guardar notas</button>
+        <button class="btnBorrar" onclick="deleteVisitante(${r.row})">Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+async function saveVisitante(row){
+  const r = VISITANTES.find(x => x.row === row);
+  await post({
+    action:'update_visitante', row,
+    nombre: r.Nombre, contacto: r.Contacto, como: r.Como,
+    notas: document.getElementById('vn-'+row).value
+  });
+  loadVisitantes();
+}
+async function deleteVisitante(row){
+  if(!confirm('¿Eliminar este registro?')) return;
+  await post({action:'delete_visitante', row});
+  loadVisitantes();
+}
+
+function formatDate(v){
+  const d = new Date(v);
+  return isNaN(d) ? '' : d.toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+document.getElementById('pinInput').addEventListener('keydown', e => { if(e.key === 'Enter') enter(); });
+</script>
+</body>
+</html>
