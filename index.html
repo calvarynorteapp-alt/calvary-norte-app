@@ -27,12 +27,27 @@
     --oro:#D4A73B;
     --texto:#2E2A26;
     --blanco:#FFFDF9;
+    --superficie:#FFFDF9;
     --exito:#55B854;
     --radius:20px;
     --shadow:0 8px 24px rgba(35,78,76,0.13);
   }
+  [data-theme="dark"]{
+    --arena:#15181A;
+    --arena-2:#1F2224;
+    --superficie:#20242A;
+    --texto:#EDEAE4;
+    --piedra:#9B968E;
+    --shadow:0 8px 24px rgba(0,0,0,0.45);
+  }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
+  .switch{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--arena-2);border-radius:26px;transition:.2s;}
+  .switch .slider:before{position:absolute;content:"";height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+  .switch input:checked + .slider{background:var(--exito);}
+  .switch input:checked + .slider:before{transform:translateX(18px);}
   body{
     font-family:'Nunito Sans',sans-serif;
     color:var(--texto);
@@ -139,7 +154,7 @@
   section.pad{padding:22px 20px 8px;}
 
   .card{
-    background:var(--blanco);
+    background:var(--superficie);
     border-radius:var(--radius);
     padding:18px;
     box-shadow:var(--shadow);
@@ -229,7 +244,7 @@
   }
   .quickBtn{
     flex:1;
-    background:var(--blanco);
+    background:var(--superficie);
     border:1px solid rgba(110,98,89,0.15);
     border-radius:14px;
     padding:14px 8px;
@@ -265,6 +280,7 @@
   .eventBody h4{margin:0 0 3px;font-size:.95rem;color:var(--noche);}
   .eventBody p{margin:0;font-size:.82rem;color:var(--piedra);line-height:1.4;}
   .eventCard{position:relative;align-items:flex-start;}
+  .eventCard.highlight{outline:2px solid var(--exito);box-shadow:0 0 0 4px rgba(85,184,84,0.25);}
   .eventTop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   .badge{
     display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.04em;
@@ -279,7 +295,7 @@
   .eventTopRow{display:flex;gap:8px;margin-bottom:16px;}
   .smallBtn{
     flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
-    background:var(--blanco);border:1px solid rgba(110,98,89,0.2);border-radius:12px;
+    background:var(--superficie);border:1px solid rgba(110,98,89,0.2);border-radius:12px;
     padding:10px 6px;font-size:.76rem;font-weight:600;color:var(--noche);cursor:pointer;
     font-family:'Nunito Sans',sans-serif;
   }
@@ -296,7 +312,7 @@
   /* Grid (Más) */
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .gridBtn{
-    background:var(--blanco);border-radius:var(--radius);padding:20px 14px;
+    background:var(--superficie);border-radius:var(--radius);padding:20px 14px;
     display:flex;flex-direction:column;gap:10px;align-items:flex-start;
     box-shadow:var(--shadow);cursor:pointer;border:none;text-align:left;
     font-family:'Nunito Sans',sans-serif;
@@ -367,11 +383,11 @@
   .mapWrap iframe{width:100%;height:230px;border:none;display:block;}
   .videoCard{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
   .videoCard iframe{width:100%;height:200px;border:none;display:block;}
-  .videoCard .vt{padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--noche);background:var(--blanco);}
+  .videoCard .vt{padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--noche);background:var(--superficie);}
 
   .track{
     display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;
-    cursor:pointer;margin-bottom:8px;background:var(--blanco);box-shadow:var(--shadow);
+    cursor:pointer;margin-bottom:8px;background:var(--superficie);box-shadow:var(--shadow);
   }
   .track.playing{background:var(--noche);}
   .track.playing .tt,.track.playing .ta{color:var(--blanco);}
@@ -397,7 +413,7 @@
   /* ---------- BOTTOM NAV ---------- */
   nav.tabbar{
     position:absolute;bottom:0;left:0;right:0;
-    background:var(--blanco);
+    background:var(--superficie);
     display:flex;
     padding:8px 4px 10px;
     box-shadow:0 -6px 20px rgba(27,42,74,0.10);
@@ -558,6 +574,18 @@
       <section class="pad">
         <h2 class="viewTitle">Más</h2>
         <p class="viewSub">Ministerios, diezmos, ubicación, videos y música</p>
+
+        <div class="card" style="display:flex;align-items:center;gap:12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <div style="flex:1;">
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Modo oscuro</h4>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <div class="grid2">
           <button class="gridBtn" onclick="showView('ministerios')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -705,6 +733,26 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2y_3cOlk_HaSR
 let notifiedDaysBefore = 3; // avisar cuando falten 3 días o menos
 let REMOTE = null; // aquí se guarda todo lo que llega del Sheet
 
+/* ---- Modo oscuro ---- */
+(function(){
+  let saved = null;
+  try{ saved = localStorage.getItem('darkMode'); }catch(e){}
+  if(saved === 'true'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+function toggleDarkMode(){
+  const on = document.getElementById('darkModeToggle').checked;
+  document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
+  try{ localStorage.setItem('darkMode', on ? 'true' : 'false'); }catch(e){}
+}
+document.addEventListener('DOMContentLoaded', function(){
+  let saved = null;
+  try{ saved = localStorage.getItem('darkMode'); }catch(e){}
+  const toggle = document.getElementById('darkModeToggle');
+  if(toggle) toggle.checked = (saved === 'true');
+});
+
 /* ---- Instalar como app (PWA) ---- */
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -832,7 +880,7 @@ function renderEvents(){
       else if(diffDays === 1) badge = `<span class="badge soon">¡Es mañana!</span>`;
       else if(diffDays <= notifiedDaysBefore) badge = `<span class="badge soon">Faltan ${diffDays} días</span>`;
       return `
-      <div class="eventCard">
+      <div class="eventCard" data-titulo="${escapeAttr(e.title)}" data-fecha="${e.date}">
         <div class="eventDate"><div class="num">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div></div>
         <div class="eventBody" style="flex:1;">
           <div class="eventTop">
@@ -866,6 +914,15 @@ function formatDateStr(val){
 function addEventToCalendar(i){
   const e = (window.CURRENT_EVENTS || [])[i];
   if(!e) return;
+
+  // Si la app está corriendo dentro del WebView de Android (con el puente
+  // nativo instalado), usa el selector de calendario propio de Android
+  // en vez de descargar un archivo .ics.
+  if(window.AndroidCalendar && typeof window.AndroidCalendar.addToCalendar === 'function'){
+    window.AndroidCalendar.addToCalendar(e.title, e.date, e.desc || '');
+    return;
+  }
+
   const startStr = e.date.replace(/-/g,'');
   const next = new Date(e.date+'T00:00:00');
   next.setDate(next.getDate()+1);
@@ -1193,6 +1250,23 @@ function renderSchedule(){
 function escapeHtml(s){
   return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+
+// Llamada desde la app de Android cuando se toca una notificación de
+// evento nuevo: cambia a la pestaña de Eventos y resalta la tarjeta.
+window.deepLinkToEvent = function(titulo, fecha){
+  showView('eventos');
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.eventCard');
+    cards.forEach(c => {
+      if(c.dataset.titulo === titulo && c.dataset.fecha === fecha){
+        c.classList.add('highlight');
+        c.scrollIntoView({behavior:'smooth', block:'center'});
+        setTimeout(() => c.classList.remove('highlight'), 3000);
+      }
+    });
+  }, 300);
+};
 async function submitPrayer(){
   const name = document.getElementById('prName').value.trim();
   const msg = document.getElementById('prMsg').value.trim();
@@ -1245,5 +1319,3 @@ loadRemoteContent();
 </script>
 </body>
 </html>
-
- 
