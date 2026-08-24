@@ -59,7 +59,8 @@
   #app{
     width:100%;
     max-width:430px;
-    min-height:100vh;
+    height:100vh;
+    height:100dvh;
     background:var(--arena);
     display:flex;
     flex-direction:column;
@@ -67,7 +68,7 @@
     overflow:hidden;
   }
   @media (min-width:431px){
-    #app{ min-height:100vh; margin:0 auto; box-shadow:var(--shadow); border-radius:28px; overflow:hidden;}
+    #app{ height:100vh; height:100dvh; margin:0 auto; box-shadow:var(--shadow); border-radius:28px; overflow:hidden;}
     body{ padding:24px 0; }
   }
 
@@ -555,17 +556,17 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             Transferencia bancaria
           </h3>
-          <div class="giveRow"><span class="k">Banco</span><span class="v">Ej. BBVA</span></div>
-          <div class="giveRow"><span class="k">Cuenta</span><span class="v">000 000 0000</span></div>
-          <div class="giveRow"><span class="k">CLABE</span><span class="v">0000 0000 0000 0000 00</span></div>
-          <div class="giveRow"><span class="k">A nombre de</span><span class="v">Calvary Culiacán Norte A.R.</span></div>
+          <div class="giveRow"><span class="k">Banco</span><span class="v">BBVA</span></div>
+          <div class="giveRow"><span class="k">Cuenta</span><span class="v">011 813 4995</span></div>
+          <div class="giveRow"><span class="k">CLABE</span><span class="v">0127 3000 1181 3499 50</span></div>
+          <div class="giveRow"><span class="k">A nombre de</span><span class="v">Calvary Culiacan AC</span></div>
         </div>
 
-        <button class="btnGhost" onclick="window.open('https://www.paypal.com/donate','_blank')">
+        <button class="btnGhost" onclick="window.open(' ','_blank')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
           Dar en línea
         </button>
-        <p style="font-size:.72rem;color:var(--piedra);margin-top:10px;text-align:center;">La iglesia actualizará este enlace con su cuenta de donación real.</p>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:10px;text-align:center;"> Recuerda que si realizas un donativo a manos a la obra colocar el consepto "Manos a la obra".  </p>
       </section>
     </div>
 
@@ -673,7 +674,7 @@
         </div>
         <iframe id="driveAudioFrame" src="" style="width:100%;height:80px;border:none;border-radius:12px;display:none;" allow="autoplay"></iframe>
         <audio id="audioEl"></audio>
-        <p style="font-size:.72rem;color:var(--piedra);margin-top:12px;">La música se transmite desde Google Drive. Necesitas conexión a internet para escucharla.</p>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:12px;"> Musica de banda calvary culiacan</p>
       </section>
     </div>
 
