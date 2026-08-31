@@ -556,17 +556,17 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             Transferencia bancaria
           </h3>
-          <div class="giveRow"><span class="k">Banco</span><span class="v">BBVA</span></div>
-          <div class="giveRow"><span class="k">Cuenta</span><span class="v">011 813 4995</span></div>
-          <div class="giveRow"><span class="k">CLABE</span><span class="v">0127 3000 1181 3499 50</span></div>
-          <div class="giveRow"><span class="k">A nombre de</span><span class="v">Calvary Culiacan AC</span></div>
+          <div class="giveRow"><span class="k">Banco</span><span class="v" id="donBanco">BBVA</span></div>
+          <div class="giveRow"><span class="k">Cuenta</span><span class="v" id="donCuenta">011 813 4995</span></div>
+          <div class="giveRow"><span class="k">CLABE</span><span class="v" id="donClabe">0127 3000 1181 3499 50</span></div>
+          <div class="giveRow"><span class="k">A nombre de</span><span class="v" id="donNombre">Calvary Culiacan AC</span></div>
         </div>
 
-        <button class="btnGhost" onclick="window.open(' ','_blank')">
+        <button class="btnGhost" onclick="compartirDatosDonativo()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-          Dar en línea
+          Compartir datos por WhatsApp
         </button>
-        <p style="font-size:.72rem;color:var(--piedra);margin-top:10px;text-align:center;"> Recuerda que si realizas un donativo a manos a la obra colocar el concepto "Manos a la obra".  </p>
+        <p style="font-size:.72rem;color:var(--piedra);margin-top:10px;text-align:center;"> Recuerda que si realizas un donativo a manos a la obra colocar el consepto "Manos a la obra".  </p>
       </section>
     </div>
 
@@ -841,6 +841,8 @@ function showView(name){
   });
   currentView = name;
   document.getElementById('main').scrollTop = 0;
+  try{ localStorage.setItem('lastView', name); }catch(e){}
+  if(name !== 'inicio') pauseLiveVideo();
 }
 function goBack(){ showView(SUB_VIEWS[currentView] || 'inicio'); }
 
@@ -1226,7 +1228,7 @@ function renderLive(){
   }
   el.style.display = 'block';
   el.innerHTML = `
-    <iframe loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0" title="En vivo" allowfullscreen></iframe>
+    <iframe id="liveVideoFrame" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay"></iframe>
     <div class="liveTag">
       <span class="dotPulse"></span>
       <div class="liveTxt">
@@ -1234,6 +1236,17 @@ function renderLive(){
         <p>${escapeHtml(live.title || '')}</p>
       </div>
     </div>`;
+}
+
+// Pausa el video en vivo de Inicio cuando el usuario navega a otra pestaña,
+// para que no se siga escuchando de fondo sin darse cuenta.
+function pauseLiveVideo(){
+  const frame = document.getElementById('liveVideoFrame');
+  if(frame && frame.contentWindow){
+    try{
+      frame.contentWindow.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+    }catch(e){}
+  }
 }
 
 function renderSchedule(){
@@ -1252,6 +1265,29 @@ function escapeHtml(s){
   return (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+
+// Comparte los datos bancarios de diezmos/ofrendas por WhatsApp (o el
+// selector nativo de compartir, si la app corre dentro de Android).
+function compartirDatosDonativo(){
+  const banco = document.getElementById('donBanco').textContent.trim();
+  const cuenta = document.getElementById('donCuenta').textContent.trim();
+  const clabe = document.getElementById('donClabe').textContent.trim();
+  const nombre = document.getElementById('donNombre').textContent.trim();
+
+  const texto = `💛 Diezmos y ofrendas — Calvary Culiacán Norte\n\n`
+    + `Banco: ${banco}\n`
+    + `Cuenta: ${cuenta}\n`
+    + `CLABE: ${clabe}\n`
+    + `A nombre de: ${nombre}`;
+
+  if(window.AndroidShare && typeof window.AndroidShare.shareText === 'function'){
+    window.AndroidShare.shareText(texto);
+  } else if(navigator.share){
+    navigator.share({text: texto}).catch(() => {});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  }
+}
 
 // Llamada desde la app de Android cuando se toca una notificación de
 // evento nuevo: cambia a la pestaña de Eventos y resalta la tarjeta.
@@ -1316,7 +1352,31 @@ async function submitVisitor(){
     showToast('No se pudo enviar. Intenta de nuevo.');
   }
 }
+// Al abrir (o refrescar) la app, regresa a la última pestaña donde estabas,
+// en vez de siempre empezar en Inicio.
+(function(){
+  let lastView = null;
+  try{ lastView = localStorage.getItem('lastView'); }catch(e){}
+  if(lastView && TITLES[lastView]){
+    showView(lastView);
+  }
+})();
 loadRemoteContent();
+
+// Avisa a la app nativa de Android si el contenedor interno de scroll
+// está en la parte de arriba del todo — así el "deslizar para refrescar"
+// no se confunde con un scroll normal dentro de la pantalla.
+(function(){
+  const mainEl = document.getElementById('main');
+  if(!mainEl) return;
+  function report(){
+    if(window.AndroidScroll && typeof window.AndroidScroll.reportScrollTop === 'function'){
+      window.AndroidScroll.reportScrollTop(mainEl.scrollTop <= 0);
+    }
+  }
+  mainEl.addEventListener('scroll', report, {passive:true});
+  report();
+})();
 </script>
 </body>
 </html>
