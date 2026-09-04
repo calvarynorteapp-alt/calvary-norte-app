@@ -397,6 +397,13 @@
   .wallItem .msg{font-size:.85rem;color:var(--texto);line-height:1.4;}
   .wallItem .when{font-size:.68rem;color:var(--piedra);margin-top:3px;}
   .empty{text-align:center;color:var(--piedra);font-size:.82rem;padding:14px 0;}
+  .redesRow{display:flex;justify-content:center;gap:14px;margin-top:8px;}
+  .redesRow a{
+    width:46px;height:46px;border-radius:50%;background:var(--superficie);
+    display:flex;align-items:center;justify-content:center;color:var(--noche);
+    box-shadow:var(--shadow);
+  }
+  .redesRow a svg{width:22px;height:22px;}
 
   .toast{
     position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
@@ -725,6 +732,7 @@
         <h2 class="viewTitle">Quiénes somos</h2>
         <p class="viewSub">Conoce nuestra historia, misión y visión</p>
         <div id="quienesList"></div>
+        <div id="redesSociales" class="redesRow"></div>
       </section>
     </div>
 
@@ -854,6 +862,7 @@ async function loadRemoteContent(){
   renderVideos();
   renderTracks();
   renderQuienes();
+  renderRedesSociales();
   checkEventNotifications(events);
 }
 
@@ -1067,6 +1076,27 @@ updateNotifBtn();
 //      modificar horarios, eventos, ministerios ni música.
 
 // ---- Quiénes somos (viene del Google Sheet, vía REMOTE.quienes) ----
+const ICONOS_REDES = {
+  facebook: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 6.2a2.8 2.8 0 0 0-2-2C18.9 3.7 12 3.7 12 3.7s-6.9 0-8.5.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 1 12a29 29 0 0 0 .5 5.8 2.8 2.8 0 0 0 2 2c1.6.5 8.5.5 8.5.5s6.9 0 8.5-.5a2.8 2.8 0 0 0 2-2A29 29 0 0 0 23 12a29 29 0 0 0-.5-5.8z"/><polygon points="9.8 15.5 15.8 12 9.8 8.5 9.8 15.5" fill="var(--superficie)"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8a4.5 4.5 0 0 1-3.8-4.5h-3v14a2.6 2.6 0 1 1-2.6-2.6c.2 0 .5 0 .7.1V9.6a5.6 5.6 0 1 0 4.9 5.6V9.1a7.5 7.5 0 0 0 4.8 1.7V7.5a4.5 4.5 0 0 1-1-1.7z"/></svg>',
+  whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.5A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .9.9-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.5.1-.6.8-.7.9-.3.2-.5.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5s.2-.3.3-.4a1.6 1.6 0 0 0 .2-.4.5.5 0 0 0 0-.4c-.1-.1-.5-1.3-.7-1.7s-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.1 5 5 0 0 0 1.1 2.7 11.4 11.4 0 0 0 4.4 3.9c.6.2 1.1.4 1.5.5a3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.2 2.1 2.1 0 0 0 .1-1.2c-.1-.1-.2-.2-.4-.3z"/></svg>'
+};
+
+function renderRedesSociales(){
+  const el = document.getElementById('redesSociales');
+  if(!el) return;
+  const items = (REMOTE && REMOTE.redes) ? REMOTE.redes : [];
+  if(items.length === 0){ el.innerHTML = ''; return; }
+  el.innerHTML = items.map(r => {
+    const clave = quitarAcentos(r.Red);
+    const icono = ICONOS_REDES[clave];
+    if(!icono) return '';
+    return `<a href="${escapeAttr(r.URL)}" target="_blank" rel="noopener" aria-label="${escapeAttr(r.Red)}">${icono}</a>`;
+  }).join('');
+}
+
 function renderQuienes(){
   const list = document.getElementById('quienesList');
   const items = (REMOTE && REMOTE.quienes) ? REMOTE.quienes.filter(q => q.Titulo || q.Texto) : [];
