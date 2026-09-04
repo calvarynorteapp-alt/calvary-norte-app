@@ -130,6 +130,16 @@
     background:linear-gradient(160deg,var(--noche) 0%,var(--noche-2) 100%);
     overflow:hidden;
   }
+  .hero::before{
+    content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,0.32) 0%,rgba(0,0,0,0) 45%);
+  }
+  .heroGreet{
+    position:absolute;top:16px;left:18px;z-index:3;
+    color:var(--blanco);font-size:.95rem;font-weight:600;
+    font-family:'Baloo 2',sans-serif;
+    text-shadow:0 1px 4px rgba(0,0,0,0.35);
+  }
   .bannerTrack{position:absolute;inset:0;}
   .bannerSlide{
     position:absolute;inset:0;
@@ -187,6 +197,23 @@
   .schedRow .day{font-weight:600;color:var(--noche);}
   .schedRow .time{color:var(--piedra);}
 
+  #schedList{background:var(--superficie);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+  .schedRow2{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:0.5px solid rgba(110,98,89,0.15);}
+  .schedRow2:last-child{border-bottom:none;}
+  .schedRow2.proximo{background:rgba(240,150,90,0.12);border-left:3px solid var(--ocaso);padding-left:11px;}
+  .schedBadge{
+    width:38px;height:38px;border-radius:10px;background:var(--arena-2);flex-shrink:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .schedRow2.proximo .schedBadge{background:var(--ocaso);}
+  .schedBadge .sd{font-size:.58rem;font-weight:700;letter-spacing:.03em;color:var(--piedra);}
+  .schedRow2.proximo .schedBadge .sd{color:#4A1B0C;}
+  .schedBadge .sn{font-size:.82rem;font-weight:700;color:var(--noche);}
+  .schedRow2.proximo .schedBadge .sn{color:#4A1B0C;}
+  .schedTitle{font-size:.85rem;font-weight:600;color:var(--noche);}
+  .schedDesc{font-size:.76rem;color:var(--piedra);margin:1px 0 0;}
+  .schedDesc.proximo{color:var(--ocaso-2);font-weight:600;}
+
   .tagline{
     background:linear-gradient(135deg,var(--exito) 0%,#3F8F44 100%);
     color:var(--blanco);
@@ -219,6 +246,12 @@
   @keyframes pulseLive{0%,100%{opacity:1;}50%{opacity:.35;}}
   .liveBanner .liveTxt strong{display:block;font-size:.82rem;font-family:'Baloo 2',sans-serif;}
   .liveBanner .liveTxt p{margin:1px 0 0;font-size:.72rem;color:rgba(255,253,249,0.75);}
+  .liveShareBtn{
+    background:rgba(255,255,255,0.15);border:none;border-radius:50%;
+    width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    color:var(--blanco);cursor:pointer;
+  }
+  .liveShareBtn svg{width:16px;height:16px;}
 
   .installBanner{
     display:none;
@@ -400,6 +433,15 @@
   .track .playIcon svg{width:15px;height:15px;}
   .tt{font-size:.88rem;font-weight:600;color:var(--noche);margin:0;}
   .ta{font-size:.76rem;color:var(--piedra);margin:0;}
+  .downloadBtn{
+    width:32px;height:32px;border-radius:50%;border:none;flex-shrink:0;
+    background:var(--arena-2);color:var(--piedra);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .downloadBtn svg{width:16px;height:16px;}
+  .downloadBtn.downloaded{background:var(--exito);color:#fff;}
+  .downloadBtn.loading{opacity:.5;pointer-events:none;}
+  .track.playing .downloadBtn:not(.downloaded){background:rgba(255,255,255,0.15);color:var(--blanco);}
   .nowPlayingBar{
     position:sticky;bottom:0;background:var(--noche);color:var(--blanco);
     border-radius:16px;padding:12px 14px;display:none;align-items:center;gap:10px;
@@ -453,20 +495,11 @@
     <div class="view active" id="view-inicio">
       <div class="hero" id="heroBanner">
         <div class="bannerTrack" id="bannerTrack"></div>
+        <p class="heroGreet" id="heroGreet"></p>
         <div class="bannerDots" id="bannerDots"></div>
       </div>
 
       <section class="pad">
-        <div class="installBanner" id="installBanner">
-          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
-          <div class="txt">
-            <strong>Instala la app</strong>
-            <p>Agrégala a tu pantalla de inicio para abrirla como una app.</p>
-          </div>
-          <button class="installBtn" onclick="triggerInstall()">Instalar</button>
-          <button class="closeBtn" onclick="dismissInstallBanner()" aria-label="Cerrar">✕</button>
-        </div>
-
         <div class="liveBanner" id="liveBanner" style="display:none;"></div>
 
         <div class="tagline">
@@ -483,14 +516,22 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--piedra);flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
 
-        <div class="card">
-          <h3>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Horarios de servicio
-          </h3>
-          <div id="schedList">
-            <div class="schedRow"><span class="day">Cargando horario…</span></div>
+        <div style="display:flex;align-items:center;gap:8px;margin:22px 0 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:19px;height:19px;color:var(--ocaso);flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <h3 style="margin:0;font-family:'Baloo 2',sans-serif;font-size:1.05rem;color:var(--noche);">Horarios de servicio</h3>
+        </div>
+        <div id="schedList">
+          <div class="schedRow"><span class="day">Cargando horario…</span></div>
+        </div>
+
+        <div class="installBanner" id="installBanner" style="margin-top:18px;">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
+          <div class="txt">
+            <strong>Instala la app</strong>
+            <p>Agrégala a tu pantalla de inicio para abrirla como una app.</p>
           </div>
+          <button class="installBtn" onclick="triggerInstall()">Instalar</button>
+          <button class="closeBtn" onclick="dismissInstallBanner()" aria-label="Cerrar">✕</button>
         </div>
       </section>
     </div>
@@ -1096,25 +1137,58 @@ function renderTracks(){
     return;
   }
   list.innerHTML = TRACKS.map((t,i) => `
-    <div class="track" id="track-${i}" onclick="playTrack(${i})">
-      <div class="playIcon"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg></div>
-      <div><p class="tt">${escapeHtml(t.titulo)}</p><p class="ta">${escapeHtml(t.artista || '')}</p></div>
+    <div class="track" id="track-${i}">
+      <div class="playIcon" onclick="playTrack(${i})"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg></div>
+      <div style="flex:1;min-width:0;" onclick="playTrack(${i})"><p class="tt">${escapeHtml(t.titulo)}</p><p class="ta">${escapeHtml(t.artista || '')}</p></div>
+      ${t.kind === 'file' ? `<button class="downloadBtn" id="dlbtn-${i}" onclick="event.stopPropagation(); toggleDownload(${i})" aria-label="Descargar para escuchar sin internet"></button>` : ''}
     </div>`).join('');
-  // marca con un check las canciones ya guardadas para escuchar sin internet
-  TRACKS.forEach((t,i) => { if(t.kind === 'file') markOfflineBadge(i, t); });
+  // muestra el estado correcto (descargada o no) de cada botón de descarga
+  TRACKS.forEach((t,i) => { if(t.kind === 'file') refreshDownloadBtn(i, t); });
 }
 
-async function markOfflineBadge(i, t){
+async function isDownloaded(t){
   try{
     const cache = await caches.open(MUSIC_CACHE);
     const hit = await cache.match('./musica/' + t.filename);
-    if(hit){
-      const el = document.getElementById('track-'+i);
-      if(el && !el.querySelector('.offlineDot')){
-        el.insertAdjacentHTML('beforeend', '<span class="offlineDot" title="Disponible sin internet" style="margin-left:auto;color:var(--exito);font-size:.9rem;">✓</span>');
-      }
+    return !!hit;
+  }catch(e){ return false; }
+}
+
+async function refreshDownloadBtn(i, t){
+  const btn = document.getElementById('dlbtn-'+i);
+  if(!btn) return;
+  const downloaded = await isDownloaded(t);
+  btn.classList.toggle('downloaded', downloaded);
+  btn.innerHTML = downloaded
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  btn.title = downloaded ? 'Descargada — toca para borrarla' : 'Descargar para escuchar sin internet';
+}
+
+// Descarga (o borra) la canción del almacenamiento del celular, a
+// decisión del usuario — ya no se guarda sola al reproducirla.
+async function toggleDownload(i){
+  const t = TRACKS[i];
+  const url = './musica/' + t.filename;
+  const btn = document.getElementById('dlbtn-'+i);
+  try{
+    const cache = await caches.open(MUSIC_CACHE);
+    const yaDescargada = await isDownloaded(t);
+    if(yaDescargada){
+      await cache.delete(url);
+      showToast('Canción eliminada del celular');
+    } else {
+      btn.classList.add('loading');
+      const response = await fetch(url);
+      if(!response.ok) throw new Error('fetch failed');
+      await cache.put(url, response);
+      showToast('✓ Guardada para escuchar sin internet');
     }
-  }catch(e){}
+  }catch(e){
+    showToast('No se pudo completar la descarga');
+  }
+  btn.classList.remove('loading');
+  refreshDownloadBtn(i, t);
 }
 
 async function playTrack(i){
@@ -1132,8 +1206,10 @@ async function playTrack(i){
     return;
   }
 
-  // Canción del repositorio (mismo origen): se reproduce con el reproductor
-  // propio de la app y se guarda en caché para poder escucharla sin internet.
+  // Canción del repositorio: se reproduce con el reproductor propio de la
+  // app. Si ya la descargaste, se reproduce desde el celular (sin
+  // internet); si no, se transmite en el momento, SIN guardarla —
+  // guardarla es una decisión aparte, con el botón de descarga.
   document.getElementById('driveAudioFrame').style.display = 'none';
   document.getElementById('driveAudioFrame').src = '';
   document.getElementById('nowPlayingBar').classList.add('show');
@@ -1149,13 +1225,12 @@ async function playTrack(i){
       document.getElementById('npOfflineBadge').style.display = 'inline';
     } else {
       response = await fetch(url);
-      if(response.ok) cache.put(url, response.clone());
+      // Ya NO se guarda automáticamente — solo se reproduce al momento.
     }
     const blob = await response.blob();
     audioEl.src = URL.createObjectURL(blob);
     await audioEl.play();
     updatePlayIcon(true);
-    markOfflineBadge(i, t);
   }catch(e){
     showToast('No se pudo reproducir esta canción');
   }
@@ -1227,15 +1302,35 @@ function renderLive(){
     return;
   }
   el.style.display = 'block';
+  window._liveVideoId = live.id;
+  window._liveVideoTitle = live.title || '';
   el.innerHTML = `
-    <iframe id="liveVideoFrame" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay"></iframe>
+    <iframe id="liveVideoFrame" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay; fullscreen"></iframe>
     <div class="liveTag">
       <span class="dotPulse"></span>
       <div class="liveTxt">
         <strong>EN VIVO AHORA</strong>
         <p>${escapeHtml(live.title || '')}</p>
       </div>
+      <button class="liveShareBtn" onclick="compartirEnVivo()" aria-label="Compartir transmisión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+      </button>
     </div>`;
+}
+
+// Comparte el enlace de la transmisión en vivo por WhatsApp (o el
+// selector nativo, si la app corre dentro de Android).
+function compartirEnVivo(){
+  const id = window._liveVideoId;
+  if(!id) return;
+  const texto = `🔴 ¡Estamos en vivo ahora! ${window._liveVideoTitle || ''}\n\nÚnete aquí: https://www.youtube.com/watch?v=${id}`;
+  if(window.AndroidShare && typeof window.AndroidShare.shareText === 'function'){
+    window.AndroidShare.shareText(texto);
+  } else if(navigator.share){
+    navigator.share({text: texto}).catch(() => {});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  }
 }
 
 // Pausa el video en vivo de Inicio cuando el usuario navega a otra pestaña,
@@ -1249,6 +1344,36 @@ function pauseLiveVideo(){
   }
 }
 
+const DIAS_SEMANA = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+const DIAS_ABREV = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+
+function quitarAcentos(s){
+  return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+
+// Calcula, para un horario (día + hora), cuántas horas faltan a partir de
+// ahora mismo, considerando que se repite cada semana.
+function horasHastaProximo(dia, hora){
+  const diaIdx = DIAS_SEMANA.indexOf(quitarAcentos(dia));
+  if(diaIdx === -1) return Infinity;
+
+  const m = String(hora||'').trim().match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+  if(!m) return Infinity;
+  let h = parseInt(m[1], 10);
+  const min = parseInt(m[2], 10);
+  const ampm = (m[3]||'').toLowerCase();
+  if(ampm === 'pm' && h !== 12) h += 12;
+  if(ampm === 'am' && h === 12) h = 0;
+
+  const ahora = new Date();
+  const objetivo = new Date(ahora);
+  objetivo.setHours(h, min, 0, 0);
+  let diffDias = (diaIdx - ahora.getDay() + 7) % 7;
+  if(diffDias === 0 && objetivo.getTime() < ahora.getTime()) diffDias = 7; // ya pasó hoy, la próxima es en 7 días
+  objetivo.setDate(objetivo.getDate() + diffDias);
+  return (objetivo.getTime() - ahora.getTime()) / 3600000;
+}
+
 function renderSchedule(){
   const el = document.getElementById('schedList');
   const items = (REMOTE && REMOTE.horario) ? REMOTE.horario.filter(h => h.Dia) : [];
@@ -1256,9 +1381,31 @@ function renderSchedule(){
     el.innerHTML = '<div class="empty">Aún no hay horario publicado.</div>';
     return;
   }
-  el.innerHTML = items.map(h => `
-    <div class="schedRow"><span class="day">${escapeHtml(h.Dia)}</span><span class="time">${escapeHtml(h.Hora || '')} · ${escapeHtml(h.Descripcion || '')}</span></div>
-  `).join('');
+
+  // Encuentra cuál servicio sigue (el de menor tiempo restante)
+  let proximoIdx = -1, menorDiff = Infinity;
+  items.forEach((h,i) => {
+    const diff = horasHastaProximo(h.Dia, h.Hora);
+    if(diff < menorDiff){ menorDiff = diff; proximoIdx = i; }
+  });
+
+  el.innerHTML = items.map((h,i) => {
+    const diaIdx = DIAS_SEMANA.indexOf(quitarAcentos(h.Dia));
+    const abrev = diaIdx !== -1 ? DIAS_ABREV[diaIdx] : escapeHtml(h.Dia).slice(0,3).toUpperCase();
+    const numHora = (String(h.Hora||'').match(/\d{1,2}/) || [''])[0];
+    const esProximo = i === proximoIdx;
+    return `
+    <div class="schedRow2 ${esProximo ? 'proximo' : ''}">
+      <div class="schedBadge">
+        <span class="sd">${abrev}</span>
+        <span class="sn">${numHora}</span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <span class="schedTitle">${escapeHtml(h.Dia)} · ${escapeHtml(h.Hora||'')}</span>
+        <p class="schedDesc ${esProximo ? 'proximo' : ''}">${escapeHtml(h.Descripcion||'')}${esProximo ? ' · el más próximo' : ''}</p>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function escapeHtml(s){
@@ -1361,6 +1508,14 @@ async function submitVisitor(){
     showView(lastView);
   }
 })();
+// Saludo cálido según la hora del día, en el banner de Inicio
+(function(){
+  const h = new Date().getHours();
+  const saludo = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches');
+  const el = document.getElementById('heroGreet');
+  if(el) el.textContent = saludo + ' 👋';
+})();
+
 loadRemoteContent();
 
 // Avisa a la app nativa de Android si el contenedor interno de scroll
