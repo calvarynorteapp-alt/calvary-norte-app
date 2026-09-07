@@ -829,6 +829,19 @@ if('serviceWorker' in navigator){
   });
 }
 
+function renderAll(events_out){
+  renderBanner();
+  renderLive();
+  renderSchedule();
+  const events = renderEvents();
+  renderMinistries();
+  renderVideos();
+  renderTracks();
+  renderQuienes();
+  renderRedesSociales();
+  return events;
+}
+
 async function loadRemoteContent(){
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PEGA_AQUI') === 0 || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
     document.getElementById('schedList').innerHTML = '<div class="empty">Falta conectar el Google Sheet (ver instrucciones).</div>';
@@ -839,31 +852,33 @@ async function loadRemoteContent(){
     document.getElementById('quienesList').innerHTML = '<div class="empty">Falta conectar el Google Sheet.</div>';
     return;
   }
+
+  // 1) Muestra de inmediato lo último que se guardó, si hay algo — así la
+  // app no se ve vacía ni "cargando" mientras llega la versión fresca.
+  let cached = null;
+  try{ cached = localStorage.getItem('remoteCache'); }catch(err){}
+  if(cached){
+    try{
+      REMOTE = JSON.parse(cached);
+      renderAll();
+    }catch(err){}
+  }
+
+  // 2) En segundo plano, pide la versión fresca del Sheet. Si hay algo
+  // nuevo, se actualiza solo en pantalla, sin pantallas de carga ni avisos.
   try{
     const res = await fetch(APPS_SCRIPT_URL, {cache:'no-store'});
     REMOTE = await res.json();
     try{ localStorage.setItem('remoteCache', JSON.stringify(REMOTE)); }catch(err){}
+    const events = renderAll();
+    checkEventNotifications(events);
   }catch(e){
-    let cached = null;
-    try{ cached = localStorage.getItem('remoteCache'); }catch(err){}
-    if(cached){
-      REMOTE = JSON.parse(cached);
-      showToast('Sin conexión — mostrando la última versión guardada');
-    } else {
+    if(!cached){
       showToast('No se pudo conectar con el servidor de contenido');
-      return;
     }
+    // si ya había una versión guardada mostrándose, simplemente se queda
+    // así — no hace falta molestar con un aviso de error.
   }
-  renderBanner();
-  renderLive();
-  renderSchedule();
-  const events = renderEvents();
-  renderMinistries();
-  renderVideos();
-  renderTracks();
-  renderQuienes();
-  renderRedesSociales();
-  checkEventNotifications(events);
 }
 
 /* =========================================================================
