@@ -552,8 +552,8 @@
         <div class="card">
           <label for="visNombre">Tu nombre</label>
           <input type="text" id="visNombre" placeholder="Ej. Ana García">
-          <label for="visContacto">Teléfono o correo</label>
-          <input type="text" id="visContacto" placeholder="Para mantenernos en contacto" required>
+          <label for="visContacto">Teléfono (10 dígitos)</label>
+          <input type="tel" id="visContacto" inputmode="numeric" maxlength="10" placeholder="Ej. 6671234567" required oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)">
           <label for="visComo">¿Cómo nos conociste?</label>
           <input type="text" id="visComo" placeholder="Ej. un amigo, redes sociales, invitación...">
           <button class="btnPrimary" onclick="submitVisitor()">Enviar</button>
@@ -1528,14 +1528,11 @@ async function submitVisitor(){
   const como = document.getElementById('visComo').value.trim();
 
   if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
-  if(!contacto){ showToast('Escribe tu teléfono o correo antes de enviar'); return; }
+  if(!contacto){ showToast('Escribe tu número de teléfono antes de enviar'); return; }
 
-  // Validación simple: que parezca un teléfono (8+ dígitos) o un correo
-  const soloDigitos = contacto.replace(/[^\d]/g, '');
-  const pareceTelefono = soloDigitos.length >= 8;
-  const pareceCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto);
-  if(!pareceTelefono && !pareceCorreo){
-    showToast('Escribe un teléfono o correo válido');
+  // Debe ser exactamente 10 dígitos, solo números
+  if(!/^\d{10}$/.test(contacto)){
+    showToast('El teléfono debe tener exactamente 10 dígitos, solo números');
     return;
   }
 
