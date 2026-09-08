@@ -407,9 +407,10 @@
 
   .toast{
     position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
-    background:var(--noche);color:var(--blanco);padding:11px 20px;border-radius:30px;
+    background:var(--noche);color:var(--blanco);padding:11px 20px;border-radius:20px;
     font-size:.82rem;font-weight:600;box-shadow:var(--shadow);opacity:0;
-    transition:all .25s ease;pointer-events:none;z-index:50;white-space:nowrap;
+    transition:all .25s ease;pointer-events:none;z-index:50;
+    max-width:88%;text-align:center;line-height:1.4;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
@@ -551,8 +552,8 @@
         <div class="card">
           <label for="visNombre">Tu nombre</label>
           <input type="text" id="visNombre" placeholder="Ej. Ana García">
-          <label for="visContacto">Teléfono o correo (opcional)</label>
-          <input type="text" id="visContacto" placeholder="Para mantenernos en contacto">
+          <label for="visContacto">Teléfono o correo</label>
+          <input type="text" id="visContacto" placeholder="Para mantenernos en contacto" required>
           <label for="visComo">¿Cómo nos conociste?</label>
           <input type="text" id="visComo" placeholder="Ej. un amigo, redes sociales, invitación...">
           <button class="btnPrimary" onclick="submitVisitor()">Enviar</button>
@@ -690,11 +691,11 @@
         </div>
       </section>
     </div>
-    
+
     <!-- ===================== VIDEOS ===================== -->
     <div class="view" id="view-videos">
       <section class="pad">
-        <h2 class="viewTitle">Predicaciones</h2>
+        <h2 class="viewTitle">Videos</h2>
         <p class="viewSub">Prédicas y momentos de nuestra iglesia</p>
         <div id="videoList"></div>
         <button class="btnGhost" onclick="window.open('https://www.youtube.com/@CalvaryCuliacanNorte','_blank')">
@@ -707,7 +708,7 @@
     <!-- ===================== MÚSICA ===================== -->
     <div class="view" id="view-musica">
       <section class="pad">
-        <h2 class="viewTitle">Música Banda Calvary</h2>
+        <h2 class="viewTitle">Música</h2>
         <p class="viewSub">Alabanza y adoración para escuchar cuando quieras</p>
         <div id="trackList"></div>
         <div class="nowPlayingBar" id="nowPlayingBar">
@@ -915,7 +916,9 @@ function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2200);
+  const duracion = msg.length > 40 ? 3800 : 2200;
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), duracion);
 }
 
 // ---- Eventos (vienen del Google Sheet, vía REMOTE.eventos) ----
@@ -1523,7 +1526,19 @@ async function submitVisitor(){
   const nombre = document.getElementById('visNombre').value.trim();
   const contacto = document.getElementById('visContacto').value.trim();
   const como = document.getElementById('visComo').value.trim();
+
   if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
+  if(!contacto){ showToast('Escribe tu teléfono o correo antes de enviar'); return; }
+
+  // Validación simple: que parezca un teléfono (8+ dígitos) o un correo
+  const soloDigitos = contacto.replace(/[^\d]/g, '');
+  const pareceTelefono = soloDigitos.length >= 8;
+  const pareceCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contacto);
+  if(!pareceTelefono && !pareceCorreo){
+    showToast('Escribe un teléfono o correo válido');
+    return;
+  }
+
   if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PEGA_AQUI')){
     showToast('Falta conectar el Google Sheet');
     return;
@@ -1534,7 +1549,14 @@ async function submitVisitor(){
       body: JSON.stringify({tipo: 'visitante', nombre, contacto, como})
     });
     const out = await res.json();
-    if(!out.ok) throw new Error(out.error || 'error');
+    if(!out.ok){
+      if(out.error === 'duplicado'){
+        showToast(out.message || 'Ya tenemos registrado ese contacto');
+      } else {
+        showToast('No se pudo enviar. Intenta de nuevo.');
+      }
+      return;
+    }
     document.getElementById('visNombre').value = '';
     document.getElementById('visContacto').value = '';
     document.getElementById('visComo').value = '';
