@@ -431,6 +431,17 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  .liveAlertBanner{
+    max-height:0;overflow:hidden;opacity:0;
+    background:linear-gradient(90deg,#E5484D,#C4363B);
+    color:#fff;cursor:pointer;
+    display:flex;align-items:center;gap:10px;
+    padding:0 16px;transition:max-height .3s ease,opacity .3s ease,padding .3s ease;
+    position:relative;z-index:6;flex-shrink:0;
+  }
+  .liveAlertBanner.show{max-height:50px;opacity:1;padding:11px 16px;}
+  .liveAlertTxt{font-size:.8rem;font-weight:700;flex:1;}
+
   /* Diezmos */
   .giveRow{display:flex;justify-content:space-between;padding:8px 0;font-size:.85rem;border-bottom:1px dashed rgba(110,98,89,0.2);}
   .giveRow:last-child{border-bottom:none;}
@@ -513,6 +524,8 @@
       <div class="sub" id="headerSub">Culiacán Norte</div>
     </div>
   </header>
+
+  <div class="liveAlertBanner" id="liveAlertBanner"></div>
 
   <main id="main">
 
@@ -924,6 +937,7 @@ async function loadRemoteContent(){
     try{ localStorage.setItem('remoteCache', JSON.stringify(REMOTE)); }catch(err){}
     const events = renderAll();
     checkEventNotifications(events);
+    checkLiveAlert();
   }catch(e){
     if(!cached){
       showToast('No se pudo conectar con el servidor de contenido');
@@ -931,6 +945,63 @@ async function loadRemoteContent(){
     // si ya había una versión guardada mostrándose, simplemente se queda
     // así — no hace falta molestar con un aviso de error.
   }
+}
+
+// Avisa, una sola vez por cada vez que se abre la app, si hay una
+// transmisión en vivo ahora mismo — sin importar en qué pestaña esté el
+// usuario. Toca el aviso y lo manda directo a verla en Inicio.
+let liveAlertMostrado = false;
+function checkLiveAlert(){
+  const live = REMOTE && REMOTE.live;
+  if(!live || !live.id || liveAlertMostrado) return;
+  liveAlertMostrado = true;
+
+  const el = document.getElementById('liveAlertBanner');
+  if(!el) return;
+  el.innerHTML = `
+    <span class="dotPulse" style="background:#fff;"></span>
+    <span class="liveAlertTxt">🔴 Hay transmisión en vivo ahora — toca para verla</span>
+  `;
+  el.onclick = function(){
+    showView('inicio');
+    reproducirEnVivoAutomatico();
+    hideLiveAlert();
+  };
+  el.classList.add('show');
+  setTimeout(hideLiveAlert, 8000);
+}
+function hideLiveAlert(){
+  const el = document.getElementById('liveAlertBanner');
+  if(el) el.classList.remove('show');
+}
+
+// Como este autoplay viene directo de un toque de la persona (el aviso de
+// en vivo), la mayoría de navegadores lo permiten. Por si algún celular lo
+// bloquea de todas formas, intenta primero con sonido y, si falla, sin
+// sonido — así casi siempre arranca solo, en vez de quedarse detenido.
+function reproducirEnVivoAutomatico(){
+  const live = REMOTE && REMOTE.live;
+  if(!live || !live.id) return;
+
+  // Si lo habías cerrado antes, al pedirlo explícitamente desde el aviso
+  // vuelve a mostrarse — quitamos ese "cerrado" para esta transmisión.
+  try{
+    if(localStorage.getItem('liveDismissedId') === live.id){
+      localStorage.removeItem('liveDismissedId');
+    }
+  }catch(e){}
+  if(!document.getElementById('liveVideoFrame')) renderLive();
+
+  const frame = document.getElementById('liveVideoFrame');
+  if(!frame) return;
+  frame.src = `https://www.youtube.com/embed/${live.id}?autoplay=1&mute=0&enablejsapi=1`;
+  setTimeout(() => {
+    if(frame.contentWindow){
+      try{
+        frame.contentWindow.postMessage(JSON.stringify({event:'command', func:'playVideo', args:[]}), '*');
+      }catch(e){}
+    }
+  }, 600);
 }
 
 /* =========================================================================
@@ -1400,6 +1471,15 @@ function renderLive(){
     el.innerHTML = '';
     return;
   }
+
+  let cerrado = null;
+  try{ cerrado = localStorage.getItem('liveDismissedId'); }catch(e){}
+  if(cerrado === live.id){
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+
   el.style.display = 'block';
   window._liveVideoId = live.id;
   window._liveVideoTitle = live.title || '';
@@ -1414,7 +1494,22 @@ function renderLive(){
       <button class="liveShareBtn" onclick="compartirEnVivo()" aria-label="Compartir transmisión">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
       </button>
+      <button class="liveShareBtn" onclick="cerrarBannerEnVivo()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>`;
+}
+
+// El usuario puede cerrar el banner del video en vivo si no quiere verlo
+// justo ahora — se queda oculto para ESTA transmisión; si empieza una
+// transmisión nueva más adelante, sí vuelve a aparecer.
+function cerrarBannerEnVivo(){
+  const id = window._liveVideoId;
+  if(id){
+    try{ localStorage.setItem('liveDismissedId', id); }catch(e){}
+  }
+  const el = document.getElementById('liveBanner');
+  if(el){ el.style.display = 'none'; el.innerHTML = ''; }
 }
 
 // Comparte el enlace de la transmisión en vivo por WhatsApp (o el
