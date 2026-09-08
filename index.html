@@ -40,6 +40,7 @@
     --piedra:#9B968E;
     --shadow:0 8px 24px rgba(0,0,0,0.45);
   }
+  html[data-textsize="pequeno"]{font-size:88%;}
   html[data-textsize="grande"]{font-size:118%;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -508,6 +509,13 @@
     font-family:'Nunito Sans',sans-serif;font-size:.85rem;background:var(--superficie);color:var(--texto);
   }
   .a11yToggleRow{display:flex;align-items:center;gap:12px;}
+  .textSizeRow{display:flex;gap:8px;}
+  .textSizeBtn{
+    flex:1;padding:10px 0;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
+    background:var(--arena-2);color:var(--piedra);font-weight:600;font-size:.82rem;cursor:pointer;
+    font-family:'Nunito Sans',sans-serif;
+  }
+  .textSizeBtn.active{background:var(--noche);color:var(--blanco);border-color:var(--noche);}
 
   .whatsNewOverlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
@@ -715,29 +723,18 @@
         <h2 class="viewTitle">Más</h2>
         <p class="viewSub">Ministerios, diezmos, ubicación, videos y música</p>
 
-        <div class="card" style="display:flex;align-items:center;gap:12px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          <div style="flex:1;">
-            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Modo oscuro</h4>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <div class="card a11yToggleRow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-          <div style="flex:1;">
-            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Texto más grande</h4>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="textoGrandeToggle" onchange="toggleTextoGrande()">
-            <span class="slider"></span>
-          </label>
-        </div>
-
         <div class="moreList">
+          <button class="moreItem" onclick="abrirAjustes()">
+            <div class="moreIcon" style="background:#F1E7D5;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7A5A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            <div class="moreText">
+              <span class="moreTitle">Ajustes</span>
+              <span class="moreDesc">Modo oscuro, texto grande y más</span>
+            </div>
+            <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
           <button class="moreItem" onclick="showView('ministerios')">
             <div class="moreIcon" style="background:#DCEFE0;">
               <svg viewBox="0 0 24 24" fill="none" stroke="#2f6b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -791,6 +788,49 @@
               <span class="moreDesc">Alabanza para escuchar cuando quieras</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== AJUSTES ===================== -->
+    <div class="view" id="view-ajustes">
+      <section class="pad">
+        <h2 class="viewTitle">Ajustes</h2>
+        <p class="viewSub">Personaliza cómo se ve la app</p>
+
+        <div class="card" style="display:flex;align-items:center;gap:12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <div style="flex:1;">
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Modo oscuro</h4>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Tamaño de texto</h4>
+          </div>
+          <div class="textSizeRow">
+            <button class="textSizeBtn" id="tsBtn-pequeno" onclick="setTextSize('pequeno')">Pequeño</button>
+            <button class="textSizeBtn" id="tsBtn-normal" onclick="setTextSize('normal')">Normal</button>
+            <button class="textSizeBtn" id="tsBtn-grande" onclick="setTextSize('grande')">Grande</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Música descargada</h4>
+          </div>
+          <p style="font-size:.82rem;color:var(--piedra);margin:0 0 12px;" id="espacioMusicaTexto">Calculando espacio usado...</p>
+          <button class="btnGhost" onclick="liberarEspacioMusica()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Liberar espacio
           </button>
         </div>
       </section>
@@ -955,18 +995,69 @@ function toggleDarkMode(){
   try{ localStorage.setItem('darkMode', on ? 'true' : 'false'); }catch(e){}
 }
 
-/* ---- Texto más grande (accesibilidad) ---- */
+/* ---- Tamaño de texto (3 niveles) ---- */
 (function(){
   let saved = null;
-  try{ saved = localStorage.getItem('textoGrande'); }catch(e){}
-  if(saved === 'true'){
-    document.documentElement.setAttribute('data-textsize', 'grande');
+  try{ saved = localStorage.getItem('textSize'); }catch(e){}
+  if(saved === 'pequeno' || saved === 'grande'){
+    document.documentElement.setAttribute('data-textsize', saved);
   }
 })();
-function toggleTextoGrande(){
-  const on = document.getElementById('textoGrandeToggle').checked;
-  document.documentElement.setAttribute('data-textsize', on ? 'grande' : 'normal');
-  try{ localStorage.setItem('textoGrande', on ? 'true' : 'false'); }catch(e){}
+function setTextSize(nivel){
+  document.documentElement.setAttribute('data-textsize', nivel);
+  try{ localStorage.setItem('textSize', nivel); }catch(e){}
+  actualizarBotonesTextSize(nivel);
+}
+function actualizarBotonesTextSize(nivel){
+  ['pequeno','normal','grande'].forEach(n => {
+    const btn = document.getElementById('tsBtn-'+n);
+    if(btn) btn.classList.toggle('active', n === nivel);
+  });
+}
+
+/* ---- Ajustes: abrir la pantalla y calcular el espacio usado ---- */
+function abrirAjustes(){
+  showView('ajustes');
+  let saved = 'normal';
+  try{ saved = localStorage.getItem('textSize') || 'normal'; }catch(e){}
+  actualizarBotonesTextSize(saved);
+  calcularEspacioMusica();
+}
+
+async function calcularEspacioMusica(){
+  const el = document.getElementById('espacioMusicaTexto');
+  if(!el) return;
+  try{
+    const cache = await caches.open(MUSIC_CACHE);
+    const keys = await cache.keys();
+    if(keys.length === 0){
+      el.textContent = 'No tienes canciones descargadas.';
+      return;
+    }
+    let totalBytes = 0;
+    for(const req of keys){
+      const res = await cache.match(req);
+      if(res){
+        const blob = await res.blob();
+        totalBytes += blob.size;
+      }
+    }
+    const mb = (totalBytes / (1024*1024)).toFixed(1);
+    el.textContent = `${keys.length} canción${keys.length===1?'':'es'} descargada${keys.length===1?'':'s'} · ${mb} MB usados`;
+  }catch(e){
+    el.textContent = 'No se pudo calcular el espacio usado.';
+  }
+}
+
+async function liberarEspacioMusica(){
+  if(!confirm('¿Borrar todas las canciones descargadas? Podrás volver a descargarlas cuando quieras.')) return;
+  try{
+    await caches.delete(MUSIC_CACHE);
+    showToast('Espacio liberado');
+    calcularEspacioMusica();
+  }catch(e){
+    showToast('No se pudo liberar el espacio');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -979,11 +1070,6 @@ document.addEventListener('DOMContentLoaded', function(){
   if(shuffleBtn) shuffleBtn.classList.toggle('active', modoAleatorio);
   const repeatBtn = document.getElementById('repeatBtn');
   if(repeatBtn) repeatBtn.classList.toggle('active', modoRepetir);
-
-  let savedTextSize = null;
-  try{ savedTextSize = localStorage.getItem('textoGrande'); }catch(e){}
-  const textToggle = document.getElementById('textoGrandeToggle');
-  if(textToggle) textToggle.checked = (savedTextSize === 'true');
 });
 
 /* ---- Instalar como app (PWA) ---- */
@@ -1130,10 +1216,11 @@ const TITLES = {
   inicio:['Calvary','Culiacán Norte'], eventos:['Eventos','Anuncios'], oracion:['Oración','Petición privada'],
   diezmos:['Diezmos','Ofrendas'], mas:['Más','Explorar'], ministerios:['Ministerios','Grupos'],
   ubicacion:['Ubicación','Cómo llegar'], videos:['Videos','YouTube'], musica:['Música','Alabanza'],
-  nuevo:['Bienvenida','Cuéntanos de ti'], quienes:['Quiénes somos','Nuestra historia']
+  nuevo:['Bienvenida','Cuéntanos de ti'], quienes:['Quiénes somos','Nuestra historia'],
+  ajustes:['Ajustes','Personalización']
 };
 const PRIMARY_TABS = ['inicio','eventos','quienes','oracion','mas'];
-const SUB_VIEWS = {ministerios:'mas', ubicacion:'mas', videos:'mas', musica:'mas', nuevo:'inicio', diezmos:'mas'};
+const SUB_VIEWS = {ministerios:'mas', ubicacion:'mas', videos:'mas', musica:'mas', nuevo:'inicio', diezmos:'mas', ajustes:'mas'};
 let currentView = 'inicio';
 
 function showView(name){
