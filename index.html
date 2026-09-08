@@ -327,6 +327,27 @@
   .delBtn svg{width:16px;height:16px;}
 
   .eventTopRow{display:flex;gap:8px;margin-bottom:16px;}
+  .eventFilterRow{display:flex;gap:8px;margin-bottom:16px;}
+  .filterChip{
+    background:var(--superficie);border:1px solid rgba(110,98,89,0.2);border-radius:20px;
+    padding:7px 14px;font-size:.78rem;font-weight:600;color:var(--piedra);cursor:pointer;
+    font-family:'Nunito Sans',sans-serif;
+  }
+  .filterChip.active{background:var(--noche);color:var(--blanco);border-color:var(--noche);}
+  .monthHeader{
+    font-size:.78rem;font-weight:700;color:var(--piedra);text-transform:uppercase;
+    letter-spacing:.06em;margin:18px 0 10px;
+  }
+  .monthHeader:first-child{margin-top:0;}
+  .eventCountdown{
+    font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:20px;
+    background:var(--exito);color:#fff;display:inline-block;
+  }
+  .eventCountdown.hoy{background:var(--vino);}
+  .eventShareBtn{
+    background:none;border:none;color:var(--piedra);cursor:pointer;padding:4px;flex-shrink:0;
+  }
+  .eventShareBtn svg{width:16px;height:16px;}
   .smallBtn{
     flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
     background:var(--superficie);border:1px solid rgba(110,98,89,0.2);border-radius:12px;
@@ -602,6 +623,12 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
             <span id="notifBtnTxt">Activar avisos</span>
           </button>
+        </div>
+
+        <div class="eventFilterRow">
+          <button class="filterChip active" data-filtro="todos" onclick="cambiarFiltroEventos('todos')">Todos</button>
+          <button class="filterChip" data-filtro="semana" onclick="cambiarFiltroEventos('semana')">Esta semana</button>
+          <button class="filterChip" data-filtro="mes" onclick="cambiarFiltroEventos('mes')">Este mes</button>
         </div>
 
         <div id="eventList"></div>
@@ -1045,6 +1072,14 @@ function showToast(msg){
 
 // ---- Eventos (vienen del Google Sheet, vía REMOTE.eventos) ----
 const MONTHS = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const MESES_LARGO = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+let filtroEventosActual = 'todos';
+
+function cambiarFiltroEventos(filtro){
+  filtroEventosActual = filtro;
+  document.querySelectorAll('.filterChip').forEach(b => b.classList.toggle('active', b.dataset.filtro === filtro));
+  renderEvents();
+}
 
 function renderEvents(){
   const listEl = document.getElementById('eventList');
@@ -1061,34 +1096,76 @@ function renderEvents(){
     return (today - d) <= 0;
   }).sort((a,b)=> new Date(a.date) - new Date(b.date));
 
+  // Filtro rápido: esta semana / este mes / todos
+  if(filtroEventosActual !== 'todos'){
+    const limite = new Date(today);
+    if(filtroEventosActual === 'semana') limite.setDate(limite.getDate() + 7);
+    else if(filtroEventosActual === 'mes') limite.setMonth(limite.getMonth() + 1);
+    events = events.filter(e => new Date(e.date+'T00:00:00') <= limite);
+  }
+
+  window.CURRENT_EVENTS = events;
+
   if(events.length === 0){
-    listEl.innerHTML = '<div class="empty">No hay eventos programados por ahora. ¡Vuelve pronto!</div>';
-  } else {
-    window.CURRENT_EVENTS = events;
-    listEl.innerHTML = events.map((e,i) => {
-      const d = new Date(e.date+'T00:00:00');
-      const diffDays = Math.round((d - today) / 86400000);
-      let badge = `<span class="badge later">Faltan ${diffDays} días</span>`;
-      if(diffDays === 0) badge = `<span class="badge today">¡Es hoy!</span>`;
-      else if(diffDays === 1) badge = `<span class="badge soon">¡Es mañana!</span>`;
-      else if(diffDays <= notifiedDaysBefore) badge = `<span class="badge soon">Faltan ${diffDays} días</span>`;
-      return `
+    listEl.innerHTML = '<div class="empty">No hay eventos programados para este filtro.</div>';
+    return events;
+  }
+
+  let html = '';
+  let mesAnterior = null;
+  events.forEach((e,i) => {
+    const d = new Date(e.date+'T00:00:00');
+    const mesActual = d.getFullYear() + '-' + d.getMonth();
+    if(mesActual !== mesAnterior){
+      html += `<div class="monthHeader">${MESES_LARGO[d.getMonth()]} ${d.getFullYear()}</div>`;
+      mesAnterior = mesActual;
+    }
+
+    const diffDays = Math.round((d - today) / 86400000);
+    let countdownTxt = `Faltan ${diffDays} días`;
+    let countdownClass = '';
+    if(diffDays === 0){ countdownTxt = '¡Es hoy!'; countdownClass = 'hoy'; }
+    else if(diffDays === 1){ countdownTxt = '¡Es mañana!'; countdownClass = 'hoy'; }
+
+    html += `
       <div class="eventCard" data-titulo="${escapeAttr(e.title)}" data-fecha="${e.date}">
         <div class="eventDate"><div class="num">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div></div>
         <div class="eventBody" style="flex:1;">
           <div class="eventTop">
             <h4>${escapeHtml(e.title)}</h4>
-            <button class="delBtn" onclick="addEventToCalendar(${i})" aria-label="Agregar al calendario" title="Agregar al calendario">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-            </button>
+            <div style="display:flex;gap:4px;">
+              <button class="eventShareBtn" onclick="compartirEvento(${i})" aria-label="Compartir evento" title="Compartir">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+              </button>
+              <button class="delBtn" onclick="addEventToCalendar(${i})" aria-label="Agregar al calendario" title="Agregar al calendario">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+              </button>
+            </div>
           </div>
           <p>${escapeHtml(e.desc)}</p>
-          ${badge}
+          <span class="eventCountdown ${countdownClass}">${countdownTxt}</span>
         </div>
       </div>`;
-    }).join('');
-  }
+  });
+  listEl.innerHTML = html;
   return events;
+}
+
+// Comparte un evento específico por WhatsApp (o el selector nativo, si la
+// app corre dentro de Android).
+function compartirEvento(i){
+  const e = (window.CURRENT_EVENTS || [])[i];
+  if(!e) return;
+  const d = new Date(e.date+'T00:00:00');
+  const fechaTexto = `${d.getDate()} de ${MESES_LARGO[d.getMonth()].toLowerCase()}`;
+  const texto = `📅 ${e.title}\n${fechaTexto}\n\n${e.desc || ''}\n\n— Calvary Culiacán Norte`;
+  if(window.AndroidShare && typeof window.AndroidShare.shareText === 'function'){
+    window.AndroidShare.shareText(texto);
+  } else if(navigator.share){
+    navigator.share({text: texto}).catch(() => {});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  }
 }
 
 // El Sheet puede traer la fecha como texto "2026-08-14" o como objeto Date
