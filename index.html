@@ -1522,6 +1522,18 @@ async function submitPrayer(){
   }
 }
 
+// Filtra los casos más obvios de números inventados (no confirma que el
+// número exista de verdad — para eso se necesitaría verificación por SMS).
+function telefonoParecheReal(t){
+  if(!/^\d{10}$/.test(t)) return false;
+  if(t[0] === '0') return false;                          // ningún LADA mexicano empieza con 0
+  if(/^(\d)\1{9}$/.test(t)) return false;                  // todos los dígitos iguales (1111111111)
+  if(t === '0123456789' || t === '9876543210') return false; // secuencia obvia
+  const distintos = new Set(t.split('')).size;
+  if(distintos <= 2) return false;                         // muy poca variedad (5151515151)
+  return true;
+}
+
 async function submitVisitor(){
   const nombre = document.getElementById('visNombre').value.trim();
   const contacto = document.getElementById('visContacto').value.trim();
@@ -1530,9 +1542,8 @@ async function submitVisitor(){
   if(!nombre){ showToast('Escribe tu nombre antes de enviar'); return; }
   if(!contacto){ showToast('Escribe tu número de teléfono antes de enviar'); return; }
 
-  // Debe ser exactamente 10 dígitos, solo números
-  if(!/^\d{10}$/.test(contacto)){
-    showToast('El teléfono debe tener exactamente 10 dígitos, solo números');
+  if(!telefonoParecheReal(contacto)){
+    showToast('Escribe un número de teléfono válido');
     return;
   }
 
