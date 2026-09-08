@@ -40,6 +40,7 @@
     --piedra:#9B968E;
     --shadow:0 8px 24px rgba(0,0,0,0.45);
   }
+  html[data-textsize="grande"]{font-size:118%;}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   .switch{position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0;}
@@ -488,6 +489,38 @@
     display:flex;align-items:center;justify-content:center;color:#fff;
   }
   .track .playIcon svg{width:15px;height:15px;}
+
+  .musicControlsRow{display:flex;gap:8px;margin-bottom:14px;}
+  .musicControlsRow input{
+    flex:1;padding:9px 12px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
+    font-family:'Nunito Sans',sans-serif;font-size:.85rem;background:var(--superficie);color:var(--texto);
+  }
+  .musicToggleBtn{
+    width:38px;height:38px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
+    background:var(--superficie);color:var(--piedra);cursor:pointer;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .musicToggleBtn svg{width:17px;height:17px;}
+  .musicToggleBtn.active{background:var(--exito);color:#fff;border-color:var(--exito);}
+  .searchInputRow{margin-bottom:14px;}
+  .searchInputRow input{
+    width:100%;padding:9px 12px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
+    font-family:'Nunito Sans',sans-serif;font-size:.85rem;background:var(--superficie);color:var(--texto);
+  }
+  .a11yToggleRow{display:flex;align-items:center;gap:12px;}
+
+  .whatsNewOverlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+  }
+  .whatsNewOverlay.show{display:flex;}
+  .whatsNewCard{
+    background:var(--superficie);border-radius:20px;padding:22px;max-width:340px;width:100%;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .whatsNewCard h3{margin:0 0 14px;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:1.1rem;}
+  .whatsNewCard ul{margin:0 0 16px;padding-left:20px;}
+  .whatsNewCard li{font-size:.86rem;color:var(--texto);margin-bottom:8px;line-height:1.4;}
   .tt{font-size:.88rem;font-weight:600;color:var(--noche);margin:0;}
   .ta{font-size:.76rem;color:var(--piedra);margin:0;}
   .downloadBtn{
@@ -693,6 +726,17 @@
           </label>
         </div>
 
+        <div class="card a11yToggleRow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <div style="flex:1;">
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Texto más grande</h4>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="textoGrandeToggle" onchange="toggleTextoGrande()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
         <div class="moreList">
           <button class="moreItem" onclick="showView('ministerios')">
             <div class="moreIcon" style="background:#DCEFE0;">
@@ -788,6 +832,9 @@
       <section class="pad">
         <h2 class="viewTitle">Videos</h2>
         <p class="viewSub">Prédicas y momentos de nuestra iglesia</p>
+        <div class="searchInputRow">
+          <input type="text" id="videosSearch" placeholder="Buscar video por título..." oninput="renderVideos()">
+        </div>
         <div id="videoList"></div>
         <button class="btnGhost" onclick="window.open('https://www.youtube.com/@CalvaryCuliacanNorte','_blank')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.5 6.2a2.8 2.8 0 0 0-2-2C18.9 3.7 12 3.7 12 3.7s-6.9 0-8.5.5a2.8 2.8 0 0 0-2 2A29 29 0 0 0 1 12a29 29 0 0 0 .5 5.8 2.8 2.8 0 0 0 2 2c1.6.5 8.5.5 8.5.5s6.9 0 8.5-.5a2.8 2.8 0 0 0 2-2A29 29 0 0 0 23 12a29 29 0 0 0-.5-5.8z"/><polygon points="9.8 15.5 15.8 12 9.8 8.5 9.8 15.5"/></svg>
@@ -801,6 +848,17 @@
       <section class="pad">
         <h2 class="viewTitle">Música</h2>
         <p class="viewSub">Alabanza y adoración para escuchar cuando quieras</p>
+
+        <div class="musicControlsRow">
+          <input type="text" id="musicaSearch" placeholder="Buscar canción o artista..." oninput="renderTracks()">
+          <button class="musicToggleBtn" id="shuffleBtn" onclick="toggleShuffle()" aria-label="Aleatorio" title="Aleatorio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+          </button>
+          <button class="musicToggleBtn" id="repeatBtn" onclick="toggleRepeat()" aria-label="Repetir" title="Repetir">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </button>
+        </div>
+
         <div id="trackList"></div>
         <div class="nowPlayingBar" id="nowPlayingBar">
           <button onclick="toggleFilePlay()" id="npPlayBtn">
@@ -854,6 +912,14 @@
   </nav>
 
   <div class="toast" id="toast"></div>
+
+  <div class="whatsNewOverlay" id="whatsNewOverlay">
+    <div class="whatsNewCard">
+      <h3>✨ Qué hay de nuevo</h3>
+      <ul id="whatsNewList"></ul>
+      <button class="btnPrimary" onclick="cerrarQueHayDeNuevo()">Entendido</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -888,11 +954,36 @@ function toggleDarkMode(){
   document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
   try{ localStorage.setItem('darkMode', on ? 'true' : 'false'); }catch(e){}
 }
+
+/* ---- Texto más grande (accesibilidad) ---- */
+(function(){
+  let saved = null;
+  try{ saved = localStorage.getItem('textoGrande'); }catch(e){}
+  if(saved === 'true'){
+    document.documentElement.setAttribute('data-textsize', 'grande');
+  }
+})();
+function toggleTextoGrande(){
+  const on = document.getElementById('textoGrandeToggle').checked;
+  document.documentElement.setAttribute('data-textsize', on ? 'grande' : 'normal');
+  try{ localStorage.setItem('textoGrande', on ? 'true' : 'false'); }catch(e){}
+}
+
 document.addEventListener('DOMContentLoaded', function(){
   let saved = null;
   try{ saved = localStorage.getItem('darkMode'); }catch(e){}
   const toggle = document.getElementById('darkModeToggle');
   if(toggle) toggle.checked = (saved === 'true');
+
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  if(shuffleBtn) shuffleBtn.classList.toggle('active', modoAleatorio);
+  const repeatBtn = document.getElementById('repeatBtn');
+  if(repeatBtn) repeatBtn.classList.toggle('active', modoRepetir);
+
+  let savedTextSize = null;
+  try{ savedTextSize = localStorage.getItem('textoGrande'); }catch(e){}
+  const textToggle = document.getElementById('textoGrandeToggle');
+  if(textToggle) textToggle.checked = (savedTextSize === 'true');
 });
 
 /* ---- Instalar como app (PWA) ---- */
@@ -1342,11 +1433,17 @@ function renderMinistries(){
     list.innerHTML = '<div class="empty">Aún no hay ministerios publicados.</div>';
     return;
   }
-  list.innerHTML = items.map(m => `
+  window.CURRENT_MINISTERIOS = items;
+  list.innerHTML = items.map((m,i) => `
     <div class="card minCard">
       <div class="minIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg></div>
-      <div>
-        <h4>${escapeHtml(m.Nombre)}</h4>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">
+          <h4 style="margin:0;">${escapeHtml(m.Nombre)}</h4>
+          <button class="eventShareBtn" onclick="compartirMinisterio(${i})" aria-label="Compartir ministerio" title="Compartir">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+          </button>
+        </div>
         <p>${escapeHtml(m.Descripcion || '')}</p>
         ${m.WhatsApp ? `<a href="${escapeHtml(m.WhatsApp)}" target="_blank" rel="noopener">Contactar por WhatsApp →</a>` : ''}
       </div>
@@ -1354,11 +1451,32 @@ function renderMinistries(){
 }
 
 // ---- Videos (vienen del canal de YouTube, vía REMOTE.videos) ----
+function compartirMinisterio(i){
+  const m = (window.CURRENT_MINISTERIOS || [])[i];
+  if(!m) return;
+  const texto = `🙌 Ministerio: ${m.Nombre}\n\n${m.Descripcion || ''}${m.WhatsApp ? '\n\nContacto: ' + m.WhatsApp : ''}\n\n— Calvary Culiacán Norte`;
+  if(window.AndroidShare && typeof window.AndroidShare.shareText === 'function'){
+    window.AndroidShare.shareText(texto);
+  } else if(navigator.share){
+    navigator.share({text: texto}).catch(() => {});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+  }
+}
+
 function renderVideos(){
   const list = document.getElementById('videoList');
-  const items = (REMOTE && REMOTE.videos) ? REMOTE.videos : [];
-  if(items.length === 0){
+  let items = (REMOTE && REMOTE.videos) ? REMOTE.videos : [];
+  const buscador = document.getElementById('videosSearch');
+  const busqueda = buscador ? quitarAcentos(buscador.value) : '';
+  if(busqueda) items = items.filter(v => quitarAcentos(v.title).includes(busqueda));
+
+  if((REMOTE && REMOTE.videos ? REMOTE.videos.length : 0) === 0){
     list.innerHTML = '<div class="empty">No se encontraron videos recientes del canal.</div>';
+    return;
+  }
+  if(items.length === 0){
+    list.innerHTML = '<div class="empty">No se encontró ningún video con ese título.</div>';
     return;
   }
   list.innerHTML = items.map(v => `
@@ -1374,13 +1492,24 @@ const audioEl = document.getElementById('audioEl');
 let currentTrack = -1;
 let TRACKS = [];
 
+let ALL_TRACKS = [];
 function renderTracks(){
   const list = document.getElementById('trackList');
-  TRACKS = (REMOTE && REMOTE.musica)
+  ALL_TRACKS = (REMOTE && REMOTE.musica)
     ? REMOTE.musica.filter(t => t.titulo && ((t.kind === 'drive' && t.driveId) || (t.kind === 'file' && t.filename)))
     : [];
-  if(TRACKS.length === 0){
+
+  const busqueda = quitarAcentos(document.getElementById('musicaSearch') ? document.getElementById('musicaSearch').value : '');
+  TRACKS = busqueda
+    ? ALL_TRACKS.filter(t => quitarAcentos(t.titulo).includes(busqueda) || quitarAcentos(t.artista||'').includes(busqueda))
+    : ALL_TRACKS;
+
+  if(ALL_TRACKS.length === 0){
     list.innerHTML = '<div class="empty">Aún no hay música publicada.</div>';
+    return;
+  }
+  if(TRACKS.length === 0){
+    list.innerHTML = '<div class="empty">No se encontró ninguna canción con ese nombre.</div>';
     return;
   }
   list.innerHTML = TRACKS.map((t,i) => `
@@ -1493,7 +1622,35 @@ function updatePlayIcon(playing){
     ? '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
     : '<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
 }
-audioEl.addEventListener('ended', () => updatePlayIcon(false));
+let modoAleatorio = false;
+let modoRepetir = false;
+try{ modoAleatorio = localStorage.getItem('musicaAleatorio') === 'true'; }catch(e){}
+try{ modoRepetir = localStorage.getItem('musicaRepetir') === 'true'; }catch(e){}
+
+function toggleShuffle(){
+  modoAleatorio = !modoAleatorio;
+  try{ localStorage.setItem('musicaAleatorio', modoAleatorio ? 'true' : 'false'); }catch(e){}
+  document.getElementById('shuffleBtn').classList.toggle('active', modoAleatorio);
+}
+function toggleRepeat(){
+  modoRepetir = !modoRepetir;
+  try{ localStorage.setItem('musicaRepetir', modoRepetir ? 'true' : 'false'); }catch(e){}
+  document.getElementById('repeatBtn').classList.toggle('active', modoRepetir);
+}
+
+audioEl.addEventListener('ended', () => {
+  updatePlayIcon(false);
+  if(TRACKS.length === 0) return;
+  if(modoRepetir){
+    playTrack(currentTrack);
+  } else if(modoAleatorio){
+    let siguiente = Math.floor(Math.random() * TRACKS.length);
+    if(TRACKS.length > 1 && siguiente === currentTrack) siguiente = (siguiente + 1) % TRACKS.length;
+    playTrack(siguiente);
+  } else if(currentTrack < TRACKS.length - 1){
+    playTrack(currentTrack + 1);
+  }
+});
 
 
 // ---- Banner de inicio (viene del Google Sheet, vía REMOTE.banner) ----
@@ -1842,7 +1999,33 @@ async function submitVisitor(){
   if(el) el.textContent = saludo + ' 👋';
 })();
 
+// ---- "Qué hay de nuevo" ----
+// Sube este número cada vez que agregues algo importante, y actualiza la
+// lista — se muestra una sola vez por persona, la primera vez que abre
+// esta versión.
+const APP_VERSION = 'v7';
+const NOVEDADES = [
+  'Buscador y filtros nuevos en Eventos, Videos y Música',
+  'Los eventos ahora se agrupan por mes, con contador más visible',
+  'Puedes compartir un evento o un ministerio por WhatsApp',
+  'Aleatorio y repetir en el reproductor de Música',
+  'Nuevo interruptor de "Texto más grande" en Más'
+];
+function checkQueHayDeNuevo(){
+  let vistaVersion = null;
+  try{ vistaVersion = localStorage.getItem('lastSeenVersion'); }catch(e){}
+  if(vistaVersion === APP_VERSION) return;
+  const list = document.getElementById('whatsNewList');
+  list.innerHTML = NOVEDADES.map(n => `<li>${n}</li>`).join('');
+  document.getElementById('whatsNewOverlay').classList.add('show');
+}
+function cerrarQueHayDeNuevo(){
+  document.getElementById('whatsNewOverlay').classList.remove('show');
+  try{ localStorage.setItem('lastSeenVersion', APP_VERSION); }catch(e){}
+}
+
 loadRemoteContent();
+checkQueHayDeNuevo();
 
 // Avisa a la app nativa de Android si el contenedor interno de scroll
 // está en la parte de arriba del todo — así el "deslizar para refrescar"
