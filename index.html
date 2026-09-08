@@ -1394,19 +1394,21 @@ function pauseLiveVideo(){
 
 const DIAS_SEMANA = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
 const DIAS_ABREV = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+const MESES_ABREV = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
 function quitarAcentos(s){
   return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 }
 
-// Calcula, para un horario (día + hora), cuántas horas faltan a partir de
-// ahora mismo, considerando que se repite cada semana.
-function horasHastaProximo(dia, hora){
+// Calcula la fecha real de la próxima vez que cae este horario (día + hora),
+// considerando que se repite cada semana. Devuelve null si el día/hora no
+// se pudo leer.
+function fechaProximaOcurrencia(dia, hora){
   const diaIdx = DIAS_SEMANA.indexOf(quitarAcentos(dia));
-  if(diaIdx === -1) return Infinity;
+  if(diaIdx === -1) return null;
 
   const m = String(hora||'').trim().match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
-  if(!m) return Infinity;
+  if(!m) return null;
   let h = parseInt(m[1], 10);
   const min = parseInt(m[2], 10);
   const ampm = (m[3]||'').toLowerCase();
@@ -1419,7 +1421,7 @@ function horasHastaProximo(dia, hora){
   let diffDias = (diaIdx - ahora.getDay() + 7) % 7;
   if(diffDias === 0 && objetivo.getTime() < ahora.getTime()) diffDias = 7; // ya pasó hoy, la próxima es en 7 días
   objetivo.setDate(objetivo.getDate() + diffDias);
-  return (objetivo.getTime() - ahora.getTime()) / 3600000;
+  return objetivo;
 }
 
 function renderSchedule(){
@@ -1430,26 +1432,32 @@ function renderSchedule(){
     return;
   }
 
-  // Encuentra cuál servicio sigue (el de menor tiempo restante)
-  let proximoIdx = -1, menorDiff = Infinity;
-  items.forEach((h,i) => {
-    const diff = horasHastaProximo(h.Dia, h.Hora);
-    if(diff < menorDiff){ menorDiff = diff; proximoIdx = i; }
+  // Calcula la próxima fecha real de cada horario, y ordena la lista para
+  // que se muestre en el orden en que en verdad van a pasar (no en el
+  // orden fijo del Sheet).
+  const conFecha = items.map(h => ({ h, fecha: fechaProximaOcurrencia(h.Dia, h.Hora) }));
+  conFecha.sort((a,b) => {
+    const ta = a.fecha ? a.fecha.getTime() : Infinity;
+    const tb = b.fecha ? b.fecha.getTime() : Infinity;
+    return ta - tb;
   });
 
-  el.innerHTML = items.map((h,i) => {
+  el.innerHTML = conFecha.map((item, i) => {
+    const h = item.h;
+    const fecha = item.fecha;
     const diaIdx = DIAS_SEMANA.indexOf(quitarAcentos(h.Dia));
     const abrev = diaIdx !== -1 ? DIAS_ABREV[diaIdx] : escapeHtml(h.Dia).slice(0,3).toUpperCase();
-    const numHora = (String(h.Hora||'').match(/\d{1,2}/) || [''])[0];
-    const esProximo = i === proximoIdx;
+    const numDia = fecha ? fecha.getDate() : '';
+    const fechaTexto = fecha ? `${escapeHtml(h.Dia)} ${numDia} ${MESES_ABREV[fecha.getMonth()]}` : escapeHtml(h.Dia);
+    const esProximo = i === 0 && fecha;
     return `
     <div class="schedRow2 ${esProximo ? 'proximo' : ''}">
       <div class="schedBadge">
         <span class="sd">${abrev}</span>
-        <span class="sn">${numHora}</span>
+        <span class="sn">${numDia}</span>
       </div>
       <div style="flex:1;min-width:0;">
-        <span class="schedTitle">${escapeHtml(h.Dia)} · ${escapeHtml(h.Hora||'')}</span>
+        <span class="schedTitle">${fechaTexto} · ${escapeHtml(h.Hora||'')}</span>
         <p class="schedDesc ${esProximo ? 'proximo' : ''}">${escapeHtml(h.Descripcion||'')}${esProximo ? ' · el más próximo' : ''}</p>
       </div>
     </div>`;
