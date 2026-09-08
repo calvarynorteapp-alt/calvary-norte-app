@@ -1524,11 +1524,31 @@ async function submitPrayer(){
 
 // Filtra los casos más obvios de números inventados (no confirma que el
 // número exista de verdad — para eso se necesitaría verificación por SMS).
+function esSecuenciaConsecutiva(t){
+  let ascendente = true, descendente = true;
+  for(let i = 1; i < t.length; i++){
+    const anterior = parseInt(t[i-1], 10);
+    const actual = parseInt(t[i], 10);
+    if((actual - anterior + 10) % 10 !== 1) ascendente = false;
+    if((anterior - actual + 10) % 10 !== 1) descendente = false;
+  }
+  return ascendente || descendente;
+}
+
+function contarBloques(t){
+  let bloques = 1;
+  for(let i = 1; i < t.length; i++){
+    if(t[i] !== t[i-1]) bloques++;
+  }
+  return bloques;
+}
+
 function telefonoParecheReal(t){
   if(!/^\d{10}$/.test(t)) return false;
   if(t[0] === '0') return false;                          // ningún LADA mexicano empieza con 0
   if(/^(\d)\1{9}$/.test(t)) return false;                  // todos los dígitos iguales (1111111111)
-  if(t === '0123456789' || t === '9876543210') return false; // secuencia obvia
+  if(esSecuenciaConsecutiva(t)) return false;               // cualquier secuencia consecutiva (1234567890, 0987654321, etc.)
+  if(contarBloques(t) <= 5) return false;                   // patrones en bloques repetidos (1122334455, 1112223330, etc.)
   const distintos = new Set(t.split('')).size;
   if(distintos <= 2) return false;                         // muy poca variedad (5151515151)
   return true;
