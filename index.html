@@ -960,6 +960,17 @@
       <button class="btnPrimary" onclick="cerrarQueHayDeNuevo()">Entendido</button>
     </div>
   </div>
+
+  <div class="whatsNewOverlay" id="confirmOverlay">
+    <div class="whatsNewCard">
+      <h3 id="confirmTitulo">¿Confirmas?</h3>
+      <p id="confirmMensaje" style="font-size:.86rem;color:var(--piedra);margin:0 0 18px;line-height:1.5;"></p>
+      <div style="display:flex;gap:10px;">
+        <button class="btnGhost" style="margin:0;flex:1;" onclick="cerrarConfirmModal(false)">Cancelar</button>
+        <button class="btnPrimary" style="margin:0;flex:1;" onclick="cerrarConfirmModal(true)">Sí, continuar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1050,7 +1061,8 @@ async function calcularEspacioMusica(){
 }
 
 async function liberarEspacioMusica(){
-  if(!confirm('¿Borrar todas las canciones descargadas? Podrás volver a descargarlas cuando quieras.')) return;
+  const ok = await confirmarAccion('Podrás volver a descargarlas cuando quieras.', '¿Borrar todas las canciones descargadas?');
+  if(!ok) return;
   try{
     await caches.delete(MUSIC_CACHE);
     showToast('Espacio liberado');
@@ -2106,6 +2118,22 @@ function checkQueHayDeNuevo(){
   list.innerHTML = NOVEDADES.map(n => `<li>${n}</li>`).join('');
   document.getElementById('whatsNewOverlay').classList.add('show');
 }
+// Reemplaza el confirm() nativo del navegador por un modal con el estilo
+// propio de la app — se usa igual: "await confirmarAccion('¿Seguro?')"
+// devuelve true o false según lo que elija la persona.
+let _resolverConfirm = null;
+function confirmarAccion(mensaje, titulo){
+  document.getElementById('confirmTitulo').textContent = titulo || '¿Confirmas?';
+  document.getElementById('confirmMensaje').textContent = mensaje;
+  document.getElementById('confirmOverlay').classList.add('show');
+  return new Promise(resolve => { _resolverConfirm = resolve; });
+}
+function cerrarConfirmModal(respuesta){
+  document.getElementById('confirmOverlay').classList.remove('show');
+  if(_resolverConfirm) _resolverConfirm(respuesta);
+  _resolverConfirm = null;
+}
+
 function cerrarQueHayDeNuevo(){
   document.getElementById('whatsNewOverlay').classList.remove('show');
   try{ localStorage.setItem('lastSeenVersion', APP_VERSION); }catch(e){}
