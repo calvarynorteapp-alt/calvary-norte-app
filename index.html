@@ -659,13 +659,6 @@
         <h2 class="viewTitle">Anuncios y eventos</h2>
         <p class="viewSub">Lo que está pasando en nuestra iglesia</p>
 
-        <div class="eventTopRow">
-          <button class="smallBtn" id="notifBtn" onclick="requestNotifPermission()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-            <span id="notifBtnTxt">Activar avisos</span>
-          </button>
-        </div>
-
         <div class="eventFilterRow">
           <button class="filterChip active" data-filtro="todos" onclick="cambiarFiltroEventos('todos')">Todos</button>
           <button class="filterChip" data-filtro="semana" onclick="cambiarFiltroEventos('semana')">Esta semana</button>
@@ -1455,28 +1448,7 @@ async function checkEventNotifications(events){
 
 function notifyUser(msg){
   showToast(msg);
-  if(window.Notification && Notification.permission === 'granted'){
-    try{ new Notification('Calvary Culiacán Norte', {body: msg}); }catch(e){}
-  }
 }
-
-function requestNotifPermission(){
-  if(!window.Notification){ showToast('Tu navegador no soporta avisos'); return; }
-  Notification.requestPermission().then(perm=>{
-    updateNotifBtn();
-    if(perm === 'granted') showToast('Avisos activados');
-  });
-}
-function updateNotifBtn(){
-  const btn = document.getElementById('notifBtn');
-  const txt = document.getElementById('notifBtnTxt');
-  if(window.Notification && Notification.permission === 'granted'){
-    btn.classList.add('on'); txt.textContent = 'Avisos activos';
-  } else {
-    btn.classList.remove('on'); txt.textContent = 'Activar avisos';
-  }
-}
-updateNotifBtn();
 
 // ---- Administración de eventos: ya NO se hace desde la app. Se administra
 //      a distancia editando el Google Sheet — así el público nunca puede
