@@ -745,7 +745,7 @@
             </div>
             <div class="moreText">
               <span class="moreTitle">Diezmos</span>
-              <span class="moreDesc">Puedes aportar tu ofrenda en línea o por transferencia</span>
+              <span class="moreDesc">Da tu ofrenda en línea o por transferencia</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -756,7 +756,7 @@
             </div>
             <div class="moreText">
               <span class="moreTitle">Ubicación</span>
-              <span class="moreDesc">Cómo llegar a Calvary culiacan Norte</span>
+              <span class="moreDesc">Cómo llegar al templo</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -767,7 +767,7 @@
             </div>
             <div class="moreText">
               <span class="moreTitle">Videos</span>
-              <span class="moreDesc">Prédicaciones y momentos de tu iglesia</span>
+              <span class="moreDesc">Prédicas y momentos de la iglesia</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -778,7 +778,7 @@
             </div>
             <div class="moreText">
               <span class="moreTitle">Música</span>
-              <span class="moreDesc">Banda Calvary Culiacan</span>
+              <span class="moreDesc">Alabanza para escuchar cuando quieras</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -865,6 +865,7 @@
       <section class="pad">
         <h2 class="viewTitle">Videos</h2>
         <p class="viewSub">Prédicas y momentos de nuestra iglesia</p>
+        <div class="liveBanner" id="liveBannerVideos" style="display:none;"></div>
         <div class="searchInputRow">
           <input type="text" id="videosSearch" placeholder="Buscar video por título..." oninput="renderVideos()">
         </div>
@@ -1106,6 +1107,7 @@ if('serviceWorker' in navigator){
 function renderAll(events_out){
   renderBanner();
   renderLive();
+  renderLiveVideos();
   renderSchedule();
   const events = renderEvents();
   renderMinistries();
@@ -1550,9 +1552,9 @@ function renderVideos(){
     list.innerHTML = '<div class="empty">No se encontró ningún video con ese título.</div>';
     return;
   }
-  list.innerHTML = items.map(v => `
+  list.innerHTML = items.map((v,i) => `
     <div class="videoCard">
-      <iframe loading="lazy" src="https://www.youtube.com/embed/${v.id}" title="${escapeHtml(v.title)}" allowfullscreen></iframe>
+      <iframe loading="lazy" id="videoFrame-${i}" data-yt-controlled="1" src="https://www.youtube.com/embed/${v.id}?enablejsapi=1" title="${escapeHtml(v.title)}" allowfullscreen onload="iniciarEscuchaYoutube(this)"></iframe>
       <div class="vt">${escapeHtml(v.title)}</div>
     </div>`).join('');
 }
@@ -1789,7 +1791,47 @@ function renderLive(){
   window._liveVideoId = live.id;
   window._liveVideoTitle = live.title || '';
   el.innerHTML = `
-    <iframe id="liveVideoFrame" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <iframe id="liveVideoFrame" data-yt-controlled="1" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay; fullscreen" onload="iniciarEscuchaYoutube(this)"></iframe>
+    <div class="liveTag">
+      <span class="dotPulse"></span>
+      <div class="liveTxt">
+        <strong>EN VIVO AHORA</strong>
+        <p>${escapeHtml(live.title || '')}</p>
+      </div>
+      <button class="liveShareBtn" onclick="compartirEnVivo()" aria-label="Compartir transmisión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>
+      </button>
+      <button class="liveShareBtn" onclick="cerrarBannerEnVivo()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`;
+}
+
+// Igual que renderLive(), pero para el banner que vive dentro de la
+// pestaña Videos — muestra la misma transmisión, con su propio iframe.
+function renderLiveVideos(){
+  const el = document.getElementById('liveBannerVideos');
+  if(!el) return;
+  const live = REMOTE && REMOTE.live;
+  if(!live || !live.id){
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+
+  let cerrado = null;
+  try{ cerrado = localStorage.getItem('liveDismissedId'); }catch(e){}
+  if(cerrado === live.id){
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+
+  el.style.display = 'block';
+  window._liveVideoId = live.id;
+  window._liveVideoTitle = live.title || '';
+  el.innerHTML = `
+    <iframe id="liveVideoFrameVideos" data-yt-controlled="1" loading="lazy" src="https://www.youtube.com/embed/${live.id}?autoplay=0&enablejsapi=1" title="En vivo" allowfullscreen allow="autoplay; fullscreen" onload="iniciarEscuchaYoutube(this)"></iframe>
     <div class="liveTag">
       <span class="dotPulse"></span>
       <div class="liveTxt">
@@ -1806,15 +1848,18 @@ function renderLive(){
 }
 
 // El usuario puede cerrar el banner del video en vivo si no quiere verlo
-// justo ahora — se queda oculto para ESTA transmisión; si empieza una
-// transmisión nueva más adelante, sí vuelve a aparecer.
+// justo ahora — se queda oculto para ESTA transmisión (en las dos
+// pestañas donde aparece); si empieza una transmisión nueva más
+// adelante, sí vuelve a aparecer.
 function cerrarBannerEnVivo(){
   const id = window._liveVideoId;
   if(id){
     try{ localStorage.setItem('liveDismissedId', id); }catch(e){}
   }
-  const el = document.getElementById('liveBanner');
-  if(el){ el.style.display = 'none'; el.innerHTML = ''; }
+  ['liveBanner', 'liveBannerVideos'].forEach(elId => {
+    const el = document.getElementById(elId);
+    if(el){ el.style.display = 'none'; el.innerHTML = ''; }
+  });
 }
 
 // Comparte el enlace de la transmisión en vivo por WhatsApp (o el
@@ -1834,13 +1879,42 @@ function compartirEnVivo(){
 
 // Pausa el video en vivo de Inicio cuando el usuario navega a otra pestaña,
 // para que no se siga escuchando de fondo sin darse cuenta.
+// Le dice a un reproductor de YouTube que empiece a avisarnos su estado
+// (reproduciendo, pausado, etc.) — sin esto, no nos enteramos de cuándo
+// alguien le da play.
+function iniciarEscuchaYoutube(frame){
+  try{
+    frame.contentWindow.postMessage(JSON.stringify({event:'listening', id: frame.id}), '*');
+  }catch(e){}
+}
+
+// En cuanto CUALQUIER video de YouTube de la app (los de la lista, o el
+// de en vivo) empieza a reproducirse, pausa a todos los demás — así
+// nunca se escuchan dos videos al mismo tiempo, chocando entre sí.
+window.addEventListener('message', function(e){
+  let data;
+  try{ data = JSON.parse(e.data); }catch(err){ return; }
+  if(!data || data.event !== 'infoDelivery' || !data.info) return;
+  if(data.info.playerState !== 1) return; // 1 = reproduciendo
+
+  document.querySelectorAll('iframe[data-yt-controlled]').forEach(frame => {
+    if(frame.contentWindow && frame.contentWindow !== e.source){
+      try{
+        frame.contentWindow.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+      }catch(err){}
+    }
+  });
+});
+
 function pauseLiveVideo(){
-  const frame = document.getElementById('liveVideoFrame');
-  if(frame && frame.contentWindow){
-    try{
-      frame.contentWindow.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
-    }catch(e){}
-  }
+  ['liveVideoFrame', 'liveVideoFrameVideos'].forEach(frameId => {
+    const frame = document.getElementById(frameId);
+    if(frame && frame.contentWindow){
+      try{
+        frame.contentWindow.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+      }catch(e){}
+    }
+  });
 }
 
 const DIAS_SEMANA = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
