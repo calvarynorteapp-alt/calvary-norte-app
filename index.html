@@ -509,6 +509,20 @@
     font-family:'Nunito Sans',sans-serif;font-size:.85rem;background:var(--superficie);color:var(--texto);
   }
   .a11yToggleRow{display:flex;align-items:center;gap:12px;}
+
+  .bibliaSelectRow{display:flex;gap:8px;margin-bottom:16px;}
+  .bibliaSelectRow select{
+    flex:1;padding:9px 10px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
+    font-family:'Nunito Sans',sans-serif;font-size:.84rem;background:var(--superficie);color:var(--texto);
+  }
+  #bibliaTexto{
+    background:var(--superficie);border-radius:16px;padding:18px 16px;box-shadow:var(--shadow);
+    min-height:120px;margin-bottom:14px;
+  }
+  #bibliaTexto h3{margin:0 0 14px;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:1.05rem;}
+  .bibliaVerso{font-size:.92rem;line-height:1.7;color:var(--texto);margin-bottom:10px;}
+  .bibliaVerso .num{font-weight:700;color:var(--ocaso);margin-right:4px;font-size:.78rem;vertical-align:2px;}
+  .bibliaNavRow{display:flex;gap:10px;}
   .textSizeRow{display:flex;gap:8px;}
   .textSizeBtn{
     flex:1;padding:10px 0;border-radius:10px;border:1px solid rgba(110,98,89,0.25);
@@ -728,6 +742,28 @@
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
 
+          <button class="moreItem" onclick="abrirNotas()">
+            <div class="moreIcon" style="background:#E3E9F5;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#2B4E8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="moreText">
+              <span class="moreTitle">Notas</span>
+              <span class="moreDesc">Tus apuntes de las prédicas</span>
+            </div>
+            <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <button class="moreItem" onclick="abrirBiblia()">
+            <div class="moreIcon" style="background:#F5E9D0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8C6A1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            </div>
+            <div class="moreText">
+              <span class="moreTitle">Biblia</span>
+              <span class="moreDesc">4 versiones disponibles</span>
+            </div>
+            <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
           <button class="moreItem" onclick="showView('ministerios')">
             <div class="moreIcon" style="background:#DCEFE0;">
               <svg viewBox="0 0 24 24" fill="none" stroke="#2f6b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -826,6 +862,54 @@
             Liberar espacio
           </button>
         </div>
+      </section>
+    </div>
+
+    <!-- ===================== NOTAS ===================== -->
+    <div class="view" id="view-notas">
+      <section class="pad">
+        <h2 class="viewTitle">Notas</h2>
+        <p class="viewSub">Tus apuntes de las prédicas, guardados en este celular</p>
+
+        <button class="btnPrimary" style="margin-bottom:16px;" onclick="abrirEditorNota()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva nota
+        </button>
+
+        <div id="notasList"></div>
+      </section>
+    </div>
+
+    <!-- ===================== BIBLIA ===================== -->
+    <div class="view" id="view-biblia">
+      <section class="pad">
+        <h2 class="viewTitle">Biblia</h2>
+        <p class="viewSub">Elige la versión que prefieras</p>
+
+        <div class="bibliaSelectRow">
+          <select id="bibliaVersionSelect" onchange="cambiarVersionBiblia()">
+            <option value="rv1960">Reina Valera 1960</option>
+            <option value="rv1995">Reina Valera 1995</option>
+            <option value="dhh">Dios Habla Hoy</option>
+            <option value="nvi">Nueva Versión Internacional</option>
+          </select>
+        </div>
+
+        <div class="bibliaSelectRow">
+          <select id="bibliaLibroSelect" onchange="cambiarLibroBiblia()"><option>Cargando...</option></select>
+          <select id="bibliaCapituloSelect" onchange="leerCapituloBiblia()"><option>—</option></select>
+        </div>
+
+        <div id="bibliaTexto">
+          <div class="empty">Elige un libro y capítulo para empezar a leer.</div>
+        </div>
+
+        <div class="bibliaNavRow">
+          <button class="btnGhost" style="margin:0;flex:1;" onclick="capituloBibliaAnterior()">← Anterior</button>
+          <button class="btnGhost" style="margin:0;flex:1;" onclick="capituloBibliaSiguiente()">Siguiente →</button>
+        </div>
+
+        <p style="font-size:.68rem;color:var(--piedra);margin-top:14px;text-align:center;">Texto proporcionado por bible-api.deno.dev</p>
       </section>
     </div>
 
@@ -965,6 +1049,18 @@
       </div>
     </div>
   </div>
+
+  <div class="whatsNewOverlay" id="notaOverlay">
+    <div class="whatsNewCard">
+      <h3 id="notaModalTitulo">Nueva nota</h3>
+      <input type="text" id="notaTituloInput" placeholder="Título (ej. nombre de la prédica)" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);font-family:'Nunito Sans',sans-serif;font-size:.88rem;margin-bottom:10px;background:var(--superficie);color:var(--texto);">
+      <textarea id="notaTextoInput" placeholder="Escribe tu nota aquí..." rows="6" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(110,98,89,0.25);font-family:'Nunito Sans',sans-serif;font-size:.86rem;margin-bottom:16px;resize:vertical;background:var(--superficie);color:var(--texto);"></textarea>
+      <div style="display:flex;gap:10px;">
+        <button class="btnGhost" style="margin:0;flex:1;" onclick="cerrarEditorNota()">Cancelar</button>
+        <button class="btnPrimary" style="margin:0;flex:1;" onclick="guardarNota()">Guardar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1021,6 +1117,212 @@ function actualizarBotonesTextSize(nivel){
 }
 
 /* ---- Ajustes: abrir la pantalla y calcular el espacio usado ---- */
+/* ---- Notas de prédicas (guardadas en este celular, privadas) ---- */
+let notaEditandoId = null;
+
+function cargarNotas(){
+  let notas = [];
+  try{ notas = JSON.parse(localStorage.getItem('notasPredicaciones') || '[]'); }catch(e){}
+  return notas;
+}
+function guardarTodasLasNotas(notas){
+  try{ localStorage.setItem('notasPredicaciones', JSON.stringify(notas)); }catch(e){}
+}
+
+/* ---- Biblia (Reina Valera 1960) — vía bible-api.deno.dev ---- */
+const BIBLIA_API = 'https://bible-api.deno.dev/api';
+let BIBLIA_LIBROS = [];
+let bibliaLibroActual = null;
+let bibliaVersionActual = 'rv1960';
+let bibliaCapituloActual = 1;
+
+async function abrirBiblia(){
+  showView('biblia');
+  if(BIBLIA_LIBROS.length === 0){
+    await cargarLibrosBiblia();
+  }
+  // Continúa donde te quedaste, si ya habías leído algo antes
+  let guardado = null;
+  try{ guardado = JSON.parse(localStorage.getItem('bibliaUltimaLectura') || 'null'); }catch(e){}
+  if(guardado && guardado.libro){
+    if(guardado.version){
+      bibliaVersionActual = guardado.version;
+      document.getElementById('bibliaVersionSelect').value = guardado.version;
+    }
+    document.getElementById('bibliaLibroSelect').value = guardado.libro;
+    poblarCapitulosBiblia(guardado.libro);
+    document.getElementById('bibliaCapituloSelect').value = guardado.capitulo;
+    leerCapituloBiblia();
+  }
+}
+
+function cambiarVersionBiblia(){
+  bibliaVersionActual = document.getElementById('bibliaVersionSelect').value;
+  leerCapituloBiblia();
+}
+
+async function cargarLibrosBiblia(){
+  const select = document.getElementById('bibliaLibroSelect');
+  try{
+    const res = await fetch(BIBLIA_API + '/books');
+    BIBLIA_LIBROS = await res.json();
+    const antiguo = BIBLIA_LIBROS.filter(b => b.testament === 'Antiguo Testamento');
+    const nuevo = BIBLIA_LIBROS.filter(b => b.testament === 'Nuevo Testamento');
+    select.innerHTML = `
+      <optgroup label="Antiguo Testamento">${antiguo.map(b => `<option value="${b.name}">${b.name.replace(/-/g,' ')}</option>`).join('')}</optgroup>
+      <optgroup label="Nuevo Testamento">${nuevo.map(b => `<option value="${b.name}">${b.name.replace(/-/g,' ')}</option>`).join('')}</optgroup>
+    `;
+    poblarCapitulosBiblia(select.value);
+  }catch(e){
+    select.innerHTML = '<option>No se pudo cargar</option>';
+    document.getElementById('bibliaTexto').innerHTML = '<div class="empty">No se pudo conectar con el servicio de la Biblia. Intenta de nuevo más tarde.</div>';
+  }
+}
+
+function poblarCapitulosBiblia(nombreLibro){
+  const libro = BIBLIA_LIBROS.find(b => b.name === nombreLibro);
+  const select = document.getElementById('bibliaCapituloSelect');
+  if(!libro){ select.innerHTML = '<option>—</option>'; return; }
+  let opts = '';
+  for(let i = 1; i <= libro.chapters; i++) opts += `<option value="${i}">Capítulo ${i}</option>`;
+  select.innerHTML = opts;
+}
+
+function cambiarLibroBiblia(){
+  const libro = document.getElementById('bibliaLibroSelect').value;
+  poblarCapitulosBiblia(libro);
+  leerCapituloBiblia();
+}
+
+async function leerCapituloBiblia(){
+  const libro = document.getElementById('bibliaLibroSelect').value;
+  const capitulo = parseInt(document.getElementById('bibliaCapituloSelect').value, 10) || 1;
+  const version = bibliaVersionActual;
+  bibliaLibroActual = libro;
+  bibliaCapituloActual = capitulo;
+  try{ localStorage.setItem('bibliaUltimaLectura', JSON.stringify({libro, capitulo, version})); }catch(e){}
+
+  const el = document.getElementById('bibliaTexto');
+  el.innerHTML = '<div class="empty">Cargando...</div>';
+  try{
+    const url = `${BIBLIA_API}/read/${version}/${encodeURIComponent(libro.toLowerCase())}/${capitulo}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if(!data.vers || data.vers.length === 0){
+      el.innerHTML = '<div class="empty">No se encontró este capítulo en esta versión.</div>';
+      return;
+    }
+    el.innerHTML = `<h3>${escapeHtml(libro.replace(/-/g,' '))} ${capitulo}</h3>` + data.vers.map(v =>
+      `<p class="bibliaVerso"><span class="num">${v.number}</span>${escapeHtml(v.verse)}</p>`
+    ).join('');
+  }catch(e){
+    el.innerHTML = '<div class="empty">No se pudo cargar este capítulo. Revisa tu conexión.</div>';
+  }
+}
+
+function capituloBibliaAnterior(){
+  const select = document.getElementById('bibliaCapituloSelect');
+  const actual = parseInt(select.value, 10) || 1;
+  if(actual > 1){
+    select.value = actual - 1;
+    leerCapituloBiblia();
+  }
+}
+function capituloBibliaSiguiente(){
+  const select = document.getElementById('bibliaCapituloSelect');
+  const actual = parseInt(select.value, 10) || 1;
+  const max = select.options.length;
+  if(actual < max){
+    select.value = actual + 1;
+    leerCapituloBiblia();
+  }
+}
+
+function abrirNotas(){
+  showView('notas');
+  renderNotas();
+}
+
+function renderNotas(){
+  const list = document.getElementById('notasList');
+  const notas = cargarNotas().sort((a,b) => b.fecha - a.fecha);
+  if(notas.length === 0){
+    list.innerHTML = '<div class="empty">Aún no tienes notas. Toca "Nueva nota" para empezar.</div>';
+    return;
+  }
+  list.innerHTML = notas.map(n => {
+    const fecha = new Date(n.fecha);
+    const fechaTxt = fecha.toLocaleDateString('es-MX', {day:'numeric', month:'short', year:'numeric'});
+    const previa = (n.texto || '').slice(0, 90) + ((n.texto||'').length > 90 ? '…' : '');
+    return `
+    <div class="card" style="padding:14px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="flex:1;min-width:0;cursor:pointer;" onclick="abrirEditorNota('${n.id}')">
+          <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">${escapeHtml(n.titulo || 'Sin título')}</h4>
+          <p style="font-size:.72rem;color:var(--piedra);margin:2px 0 6px;">${fechaTxt}</p>
+          <p style="font-size:.82rem;color:var(--texto);margin:0;line-height:1.4;">${escapeHtml(previa)}</p>
+        </div>
+        <button class="eventShareBtn" onclick="eliminarNota('${n.id}')" aria-label="Eliminar nota" title="Eliminar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirEditorNota(id){
+  notaEditandoId = id || null;
+  const titulo = document.getElementById('notaModalTitulo');
+  const tituloInput = document.getElementById('notaTituloInput');
+  const textoInput = document.getElementById('notaTextoInput');
+
+  if(id){
+    const nota = cargarNotas().find(n => n.id === id);
+    titulo.textContent = 'Editar nota';
+    tituloInput.value = nota ? nota.titulo : '';
+    textoInput.value = nota ? nota.texto : '';
+  } else {
+    titulo.textContent = 'Nueva nota';
+    tituloInput.value = '';
+    textoInput.value = '';
+  }
+  document.getElementById('notaOverlay').classList.add('show');
+}
+
+function cerrarEditorNota(){
+  document.getElementById('notaOverlay').classList.remove('show');
+  notaEditandoId = null;
+}
+
+function guardarNota(){
+  const titulo = document.getElementById('notaTituloInput').value.trim();
+  const texto = document.getElementById('notaTextoInput').value.trim();
+  if(!titulo && !texto){
+    showToast('Escribe algo antes de guardar');
+    return;
+  }
+
+  let notas = cargarNotas();
+  if(notaEditandoId){
+    notas = notas.map(n => n.id === notaEditandoId ? {...n, titulo, texto} : n);
+  } else {
+    notas.push({ id: 'nota_' + Date.now(), titulo, texto, fecha: Date.now() });
+  }
+  guardarTodasLasNotas(notas);
+  cerrarEditorNota();
+  renderNotas();
+  showToast('Nota guardada');
+}
+
+async function eliminarNota(id){
+  const ok = await confirmarAccion('Esta acción no se puede deshacer.', '¿Eliminar esta nota?');
+  if(!ok) return;
+  const notas = cargarNotas().filter(n => n.id !== id);
+  guardarTodasLasNotas(notas);
+  renderNotas();
+  showToast('Nota eliminada');
+}
+
 function abrirAjustes(){
   showView('ajustes');
   let saved = 'normal';
@@ -1224,10 +1526,10 @@ const TITLES = {
   diezmos:['Diezmos','Ofrendas'], mas:['Más','Explorar'], ministerios:['Ministerios','Grupos'],
   ubicacion:['Ubicación','Cómo llegar'], videos:['Videos','YouTube'], musica:['Música','Alabanza'],
   nuevo:['Bienvenida','Cuéntanos de ti'], quienes:['Quiénes somos','Nuestra historia'],
-  ajustes:['Ajustes','Personalización']
+  ajustes:['Ajustes','Personalización'], notas:['Notas','Tus apuntes'], biblia:['Biblia','Reina Valera 1960']
 };
 const PRIMARY_TABS = ['inicio','eventos','quienes','oracion','mas'];
-const SUB_VIEWS = {ministerios:'mas', ubicacion:'mas', videos:'mas', musica:'mas', nuevo:'inicio', diezmos:'mas', ajustes:'mas'};
+const SUB_VIEWS = {ministerios:'mas', ubicacion:'mas', videos:'mas', musica:'mas', nuevo:'inicio', diezmos:'mas', ajustes:'mas', notas:'mas', biblia:'mas'};
 let currentView = 'inicio';
 
 function showView(name){
@@ -1540,6 +1842,15 @@ function compartirMinisterio(i){
 function renderVideos(){
   const list = document.getElementById('videoList');
   let items = (REMOTE && REMOTE.videos) ? REMOTE.videos : [];
+
+  // Filtro de seguridad: por si acaso llegara el mismo video repetido.
+  const idsVistos = new Set();
+  items = items.filter(v => {
+    if(idsVistos.has(v.id)) return false;
+    idsVistos.add(v.id);
+    return true;
+  });
+
   const buscador = document.getElementById('videosSearch');
   const busqueda = buscador ? quitarAcentos(buscador.value) : '';
   if(busqueda) items = items.filter(v => quitarAcentos(v.title).includes(busqueda));
