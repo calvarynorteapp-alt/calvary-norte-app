@@ -759,7 +759,7 @@
             </div>
             <div class="moreText">
               <span class="moreTitle">Biblia</span>
-              <span class="moreDesc">4 versiones disponibles</span>
+              <span class="moreDesc">Reina Valera 1960</span>
             </div>
             <svg class="moreChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
@@ -884,16 +884,7 @@
     <div class="view" id="view-biblia">
       <section class="pad">
         <h2 class="viewTitle">Biblia</h2>
-        <p class="viewSub">Elige la versión que prefieras</p>
-
-        <div class="bibliaSelectRow">
-          <select id="bibliaVersionSelect" onchange="cambiarVersionBiblia()">
-            <option value="rv1960">Reina Valera 1960</option>
-            <option value="rv1995">Reina Valera 1995</option>
-            <option value="dhh">Dios Habla Hoy</option>
-            <option value="nvi">Nueva Versión Internacional</option>
-          </select>
-        </div>
+        <p class="viewSub">Reina Valera 1960</p>
 
         <div class="bibliaSelectRow">
           <select id="bibliaLibroSelect" onchange="cambiarLibroBiblia()"><option>Cargando...</option></select>
@@ -909,7 +900,7 @@
           <button class="btnGhost" style="margin:0;flex:1;" onclick="capituloBibliaSiguiente()">Siguiente →</button>
         </div>
 
-        <p style="font-size:.68rem;color:var(--piedra);margin-top:14px;text-align:center;">Texto proporcionado por bible-api.deno.dev</p>
+        <p style="font-size:.68rem;color:var(--piedra);margin-top:14px;text-align:center;">Texto: Reina-Valera (github.com/aruljohn/Reina-Valera)</p>
       </section>
     </div>
 
@@ -1129,91 +1120,108 @@ function guardarTodasLasNotas(notas){
   try{ localStorage.setItem('notasPredicaciones', JSON.stringify(notas)); }catch(e){}
 }
 
-/* ---- Biblia (Reina Valera 1960) — vía bible-api.deno.dev ---- */
-const BIBLIA_API = 'https://bible-api.deno.dev/api';
-let BIBLIA_LIBROS = [];
+/* ---- Biblia (Reina Valera 1960) — vía jsDelivr + GitHub (aruljohn/Reina-Valera) ---- */
+const BIBLIA_BASE = 'https://cdn.jsdelivr.net/gh/aruljohn/Reina-Valera@main/';
+const BIBLIA_LIBROS = [
+  {n:'Génesis', t:'AT'}, {n:'Éxodo', t:'AT'}, {n:'Levítico', t:'AT'}, {n:'Números', t:'AT'},
+  {n:'Deuteronomio', t:'AT'}, {n:'Josué', t:'AT'}, {n:'Jueces', t:'AT'}, {n:'Rut', t:'AT'},
+  {n:'1 Samuel', t:'AT'}, {n:'2 Samuel', t:'AT'}, {n:'1 Reyes', t:'AT'}, {n:'2 Reyes', t:'AT'},
+  {n:'1 Crónicas', t:'AT'}, {n:'2 Crónicas', t:'AT'}, {n:'Ésdras', t:'AT'}, {n:'Nehemías', t:'AT'},
+  {n:'Ester', t:'AT'}, {n:'Job', t:'AT'}, {n:'Salmos', t:'AT'}, {n:'Proverbios', t:'AT'},
+  {n:'Eclesiástes', t:'AT'}, {n:'Cantares', t:'AT'}, {n:'Isaías', t:'AT'}, {n:'Jeremías', t:'AT'},
+  {n:'Lamentaciones', t:'AT'}, {n:'Ezequiel', t:'AT'}, {n:'Daniel', t:'AT'}, {n:'Oséas', t:'AT'},
+  {n:'Joel', t:'AT'}, {n:'Amós', t:'AT'}, {n:'Abdías', t:'AT'}, {n:'Jonás', t:'AT'},
+  {n:'Miquéas', t:'AT'}, {n:'Nahum', t:'AT'}, {n:'Habacuc', t:'AT'}, {n:'Sofonías', t:'AT'},
+  {n:'Aggeo', t:'AT'}, {n:'Zacarías', t:'AT'}, {n:'Malaquías', t:'AT'},
+  {n:'San Mateo', t:'NT'}, {n:'San Márcos', t:'NT'}, {n:'San Lúcas', t:'NT'}, {n:'San Juan', t:'NT'},
+  {n:'Los Actos', t:'NT'}, {n:'Romanos', t:'NT'}, {n:'1 Corintios', t:'NT'}, {n:'2 Corintios', t:'NT'},
+  {n:'Gálatas', t:'NT'}, {n:'Efesios', t:'NT'}, {n:'Filipenses', t:'NT'}, {n:'Colosenses', t:'NT'},
+  {n:'1 Tesalonicenses', t:'NT'}, {n:'2 Tesalonicenses', t:'NT'}, {n:'1 Timoteo', t:'NT'}, {n:'2 Timoteo', t:'NT'},
+  {n:'Tito', t:'NT'}, {n:'Filemón', t:'NT'}, {n:'Hebreos', t:'NT'}, {n:'Santiago', t:'NT'},
+  {n:'1 San Pedro', t:'NT'}, {n:'2 San Pedro', t:'NT'}, {n:'1 San Juan', t:'NT'}, {n:'2 San Juan', t:'NT'},
+  {n:'3 San Juan', t:'NT'}, {n:'San Júdas', t:'NT'}, {n:'Revelación', t:'NT'}
+];
 let bibliaLibroActual = null;
-let bibliaVersionActual = 'rv1960';
 let bibliaCapituloActual = 1;
+let BIBLIA_CACHE_LIBRO = {}; // guarda el JSON ya descargado de cada libro, para no volver a pedirlo
 
-async function abrirBiblia(){
+function abrirBiblia(){
   showView('biblia');
-  if(BIBLIA_LIBROS.length === 0){
-    await cargarLibrosBiblia();
+  if(document.getElementById('bibliaLibroSelect').dataset.listo !== '1'){
+    poblarSelectorLibros();
   }
-  // Continúa donde te quedaste, si ya habías leído algo antes
+
   let guardado = null;
   try{ guardado = JSON.parse(localStorage.getItem('bibliaUltimaLectura') || 'null'); }catch(e){}
   if(guardado && guardado.libro){
-    if(guardado.version){
-      bibliaVersionActual = guardado.version;
-      document.getElementById('bibliaVersionSelect').value = guardado.version;
-    }
     document.getElementById('bibliaLibroSelect').value = guardado.libro;
-    poblarCapitulosBiblia(guardado.libro);
-    document.getElementById('bibliaCapituloSelect').value = guardado.capitulo;
-    leerCapituloBiblia();
+    poblarCapitulosBiblia(guardado.libro).then(() => {
+      document.getElementById('bibliaCapituloSelect').value = guardado.capitulo;
+      leerCapituloBiblia();
+    });
   }
 }
 
-function cambiarVersionBiblia(){
-  bibliaVersionActual = document.getElementById('bibliaVersionSelect').value;
-  leerCapituloBiblia();
-}
-
-async function cargarLibrosBiblia(){
+function poblarSelectorLibros(){
   const select = document.getElementById('bibliaLibroSelect');
-  try{
-    const res = await fetch(BIBLIA_API + '/books');
-    BIBLIA_LIBROS = await res.json();
-    const antiguo = BIBLIA_LIBROS.filter(b => b.testament === 'Antiguo Testamento');
-    const nuevo = BIBLIA_LIBROS.filter(b => b.testament === 'Nuevo Testamento');
-    select.innerHTML = `
-      <optgroup label="Antiguo Testamento">${antiguo.map(b => `<option value="${b.name}">${b.name.replace(/-/g,' ')}</option>`).join('')}</optgroup>
-      <optgroup label="Nuevo Testamento">${nuevo.map(b => `<option value="${b.name}">${b.name.replace(/-/g,' ')}</option>`).join('')}</optgroup>
-    `;
-    poblarCapitulosBiblia(select.value);
-  }catch(e){
-    select.innerHTML = '<option>No se pudo cargar</option>';
-    document.getElementById('bibliaTexto').innerHTML = '<div class="empty">No se pudo conectar con el servicio de la Biblia. Intenta de nuevo más tarde.</div>';
-  }
+  const at = BIBLIA_LIBROS.filter(b => b.t === 'AT');
+  const nt = BIBLIA_LIBROS.filter(b => b.t === 'NT');
+  select.innerHTML = `
+    <optgroup label="Antiguo Testamento">${at.map(b => `<option value="${escapeAttr(b.n)}">${escapeHtml(b.n)}</option>`).join('')}</optgroup>
+    <optgroup label="Nuevo Testamento">${nt.map(b => `<option value="${escapeAttr(b.n)}">${escapeHtml(b.n)}</option>`).join('')}</optgroup>
+  `;
+  select.dataset.listo = '1';
+  poblarCapitulosBiblia(select.value);
 }
 
-function poblarCapitulosBiblia(nombreLibro){
-  const libro = BIBLIA_LIBROS.find(b => b.name === nombreLibro);
+// Descarga (o reutiliza si ya se descargó antes) el archivo JSON de un libro completo
+async function obtenerLibroBiblia(nombreLibro){
+  if(BIBLIA_CACHE_LIBRO[nombreLibro]) return BIBLIA_CACHE_LIBRO[nombreLibro];
+  const url = BIBLIA_BASE + encodeURIComponent(nombreLibro) + '.json';
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('No se pudo descargar ' + nombreLibro);
+  const data = await res.json();
+  BIBLIA_CACHE_LIBRO[nombreLibro] = data;
+  return data;
+}
+
+async function poblarCapitulosBiblia(nombreLibro){
   const select = document.getElementById('bibliaCapituloSelect');
-  if(!libro){ select.innerHTML = '<option>—</option>'; return; }
-  let opts = '';
-  for(let i = 1; i <= libro.chapters; i++) opts += `<option value="${i}">Capítulo ${i}</option>`;
-  select.innerHTML = opts;
+  select.innerHTML = '<option>Cargando...</option>';
+  try{
+    const libro = await obtenerLibroBiblia(nombreLibro);
+    const total = libro.chapters.length;
+    let opts = '';
+    for(let i = 1; i <= total; i++) opts += `<option value="${i}">Capítulo ${i}</option>`;
+    select.innerHTML = opts;
+  }catch(e){
+    select.innerHTML = '<option>Error</option>';
+  }
 }
 
 function cambiarLibroBiblia(){
   const libro = document.getElementById('bibliaLibroSelect').value;
-  poblarCapitulosBiblia(libro);
-  leerCapituloBiblia();
+  poblarCapitulosBiblia(libro).then(() => leerCapituloBiblia());
 }
 
 async function leerCapituloBiblia(){
   const libro = document.getElementById('bibliaLibroSelect').value;
   const capitulo = parseInt(document.getElementById('bibliaCapituloSelect').value, 10) || 1;
-  const version = bibliaVersionActual;
   bibliaLibroActual = libro;
   bibliaCapituloActual = capitulo;
-  try{ localStorage.setItem('bibliaUltimaLectura', JSON.stringify({libro, capitulo, version})); }catch(e){}
+  try{ localStorage.setItem('bibliaUltimaLectura', JSON.stringify({libro, capitulo})); }catch(e){}
 
   const el = document.getElementById('bibliaTexto');
   el.innerHTML = '<div class="empty">Cargando...</div>';
   try{
-    const url = `${BIBLIA_API}/read/${version}/${encodeURIComponent(libro.toLowerCase())}/${capitulo}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if(!data.vers || data.vers.length === 0){
-      el.innerHTML = '<div class="empty">No se encontró este capítulo en esta versión.</div>';
+    const datosLibro = await obtenerLibroBiblia(libro);
+    const cap = datosLibro.chapters.find(c => Number(c.chapter) === capitulo);
+    if(!cap || !cap.verses || cap.verses.length === 0){
+      el.innerHTML = '<div class="empty">No se encontró este capítulo.</div>';
       return;
     }
-    el.innerHTML = `<h3>${escapeHtml(libro.replace(/-/g,' '))} ${capitulo}</h3>` + data.vers.map(v =>
-      `<p class="bibliaVerso"><span class="num">${v.number}</span>${escapeHtml(v.verse)}</p>`
+    el.innerHTML = `<h3>${escapeHtml(libro)} ${capitulo}</h3>` + cap.verses.map(v =>
+      `<p class="bibliaVerso"><span class="num">${v.verse}</span>${escapeHtml(v.text)}</p>`
     ).join('');
   }catch(e){
     el.innerHTML = '<div class="empty">No se pudo cargar este capítulo. Revisa tu conexión.</div>';
