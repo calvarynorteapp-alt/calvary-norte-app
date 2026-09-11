@@ -862,6 +862,18 @@
             Liberar espacio
           </button>
         </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;color:var(--ocaso);flex-shrink:0;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <h4 style="margin:0;font-family:'Baloo 2',sans-serif;color:var(--noche);font-size:.92rem;">Biblia sin conexión</h4>
+          </div>
+          <p style="font-size:.82rem;color:var(--piedra);margin:0 0 12px;" id="espacioBibliaTexto">Calculando libros descargados...</p>
+          <div style="display:flex;gap:8px;">
+            <button class="btnPrimary" style="margin:0;flex:1;" id="btnDescargarBiblia" onclick="descargarBibliaCompleta()">Descargar toda</button>
+            <button class="btnGhost" style="margin:0;flex:1;" onclick="liberarEspacioBiblia()">Liberar espacio</button>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -1175,11 +1187,30 @@ function poblarSelectorLibros(){
 }
 
 // Descarga (o reutiliza si ya se descargó antes) el archivo JSON de un libro completo
+const BIBLIA_CACHE = 'calvary-biblia-v1';
+
 async function obtenerLibroBiblia(nombreLibro){
   if(BIBLIA_CACHE_LIBRO[nombreLibro]) return BIBLIA_CACHE_LIBRO[nombreLibro];
   const url = BIBLIA_BASE + encodeURIComponent(nombreLibro) + '.json';
+
+  try{
+    const cache = await caches.open(BIBLIA_CACHE);
+    const cachedRes = await cache.match(url);
+    if(cachedRes){
+      const data = await cachedRes.json();
+      BIBLIA_CACHE_LIBRO[nombreLibro] = data;
+      return data;
+    }
+  }catch(e){ /* si la caché falla, sigue con la descarga normal */ }
+
   const res = await fetch(url);
   if(!res.ok) throw new Error('No se pudo descargar ' + nombreLibro);
+
+  try{
+    const cache = await caches.open(BIBLIA_CACHE);
+    cache.put(url, res.clone());
+  }catch(e){ /* si no se pudo guardar, no pasa nada — solo no quedará offline */ }
+
   const data = await res.json();
   BIBLIA_CACHE_LIBRO[nombreLibro] = data;
   return data;
@@ -1337,6 +1368,7 @@ function abrirAjustes(){
   try{ saved = localStorage.getItem('textSize') || 'normal'; }catch(e){}
   actualizarBotonesTextSize(saved);
   calcularEspacioMusica();
+  calcularEspacioBiblia();
 }
 
 async function calcularEspacioMusica(){
@@ -1371,6 +1403,65 @@ async function liberarEspacioMusica(){
     await caches.delete(MUSIC_CACHE);
     showToast('Espacio liberado');
     calcularEspacioMusica();
+  }catch(e){
+    showToast('No se pudo liberar el espacio');
+  }
+}
+
+async function calcularEspacioBiblia(){
+  const el = document.getElementById('espacioBibliaTexto');
+  if(!el) return;
+  try{
+    const cache = await caches.open(BIBLIA_CACHE);
+    const keys = await cache.keys();
+    if(keys.length === 0){
+      el.textContent = 'Aún no has descargado ningún libro.';
+      return;
+    }
+    let totalBytes = 0;
+    for(const req of keys){
+      const res = await cache.match(req);
+      if(res){
+        const blob = await res.blob();
+        totalBytes += blob.size;
+      }
+    }
+    const kb = (totalBytes / 1024).toFixed(0);
+    el.textContent = `${keys.length} de 66 libros descargados · ${kb} KB usados`;
+  }catch(e){
+    el.textContent = 'No se pudo calcular el espacio usado.';
+  }
+}
+
+async function descargarBibliaCompleta(){
+  const btn = document.getElementById('btnDescargarBiblia');
+  const el = document.getElementById('espacioBibliaTexto');
+  btn.disabled = true;
+  btn.textContent = 'Descargando...';
+
+  let hechos = 0;
+  for(const libro of BIBLIA_LIBROS){
+    try{
+      await obtenerLibroBiblia(libro.n);
+    }catch(e){ /* si uno falla, sigue con el resto */ }
+    hechos++;
+    el.textContent = `Descargando... ${hechos} de ${BIBLIA_LIBROS.length} libros`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Descargar toda';
+  showToast('Biblia descargada para leer sin internet');
+  calcularEspacioBiblia();
+}
+
+async function liberarEspacioBiblia(){
+  const ok = await confirmarAccion('Podrás volver a descargarla cuando quieras, libro por libro o completa.', '¿Borrar la Biblia descargada?');
+  if(!ok) return;
+  try{
+    await caches.delete(BIBLIA_CACHE);
+    BIBLIA_CACHE_LIBRO = {};
+    showToast('Espacio liberado');
+    calcularEspacioBiblia();
   }catch(e){
     showToast('No se pudo liberar el espacio');
   }
